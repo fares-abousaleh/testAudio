@@ -1,169 +1,60 @@
 <!DOCTYPE html>
-<!-- HTML !-->
 <html>
+
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-
-body{
-	background-image: linear-gradient(35deg,#2F0000, #1B0000  ,#000000);
-}
-
-.BTN {
-  align-items: center;
-  background-image: linear-gradient(35deg,#AF0000, #5B0000  ,#000000);
-  border: 0;
-  color:#ffff00; 
-  padding: 5px;
-  text-decoration: none;
-  cursor: pointer;
-  min-width:180px;
-  min-height:60px;
-  font-size:20px;
-  border-radius:8px;
-  
-}
-
- 
-
-.BTN:hover {
-  color:#ffff31;  
-  font-size:21px;
-  
-}
-
-.BTN:active{
-  color:#ffffff;  
-  font-size:21px;
-  background-image: linear-gradient(35deg,#FFF021, #9B0020  ,#500000);
-
-}
-
-</style>
+<link href="./styles.css" rel="stylesheet">
 </head>
+
 <body>
 
-<script src="./generalTools.js"></script>
- 
-<script type="module">
-	 
-	import {playSnd,stopSnd,rate} from "./audio.js"
-	import {stringSound,makeWind} from "./music.js"
-	 
+<table id="BLOCKWIND">
+	<tr>
+		<td>  notes: </td>
+		<td><input 
+		     class="INPUT" 
+			 type="text" 
+			 value="" 
+			 id="inp1"  
+			 /> 
+		</td>
+	</tr>
 	
-
-  function addMenu(){
-	let tbl = document.createElement('table')
-	tbl.innerHTML='<tr><td id="menu-btns" style="vertical-align:top"></td><td id="menu-area" style="vertical-align:top"></td></tr>'
-	document.body.appendChild(tbl)
-	return document.getElementById("menu-btns")
-  }
-  function addBtn(cap){  
-      let btn = document.createElement("button")
-	  btn.innerHTML=cap
-      btn.setAttribute("class","BTN")  
-	  btn.setAttribute("role","button")  
-	  menu.appendChild(btn)
-	  menu.appendChild(document.createElement("br"))
-      return btn
-  }
-  
-  var menu = addMenu()	
-  var can = document.createElement("canvas")
-  can.width=500
-  can.height=480
-  document.getElementById("menu-area").appendChild(can)
-  
-  const hist={str:{},wind:{}}
-  addBtn('string').onclick=function(){
-    
-	let r = rndInt(5 ,31 )*50
-	let d
-	if(hist.str[r]){
-         
-	 d= hist.str[r]
-	 }	
-	else {
-		d = stringSound(r,0.9)
-		hist.str[r]=d
-		}
-	playSnd(d)
-  }
-  addBtn('wind').onclick=function(){
-    
-	let r = rndInt(20 ,61 )*20
-	let d
-	if(hist.wind[r]){
-		      
-		 d= hist.wind[r]
-	 }	
-	else {
-		d = makeWind(r, 0.15)
-		hist.wind[r]=d
-		}
-	playSnd(d)
-  }
-  addBtn('play all str').onclick=function(){
-    let tm =0
-	let dtm = 50
-	for(let t in hist.str)
-	  {
-	     setTimeout(()=>playSnd(hist.str[t]),tm)
-		 tm+=dtm
-		 dtm+=4
-	  }
-  }
-  
-  addBtn('play all wind').onclick=function(){
-    let tm =0
-	for(let t in hist.wind)
-	  {
-	     setTimeout(()=>playSnd(hist.wind[t]),tm)
-		 tm+=150
-	  }
-  }
-  
-  addBtn('Play') 
-  addBtn("Stop").onclick=function(){
-	    stopSnd()
-	}  
-   
-  let btn_clr = addBtn('Clear')
-  
-  btn_clr.onclick=function(){
-	let c=can.getContext("2d")
-	c.fillStyle='#100000'
-	c.fillRect(0,0,can.width,can.height)
-  }
-  
-  btn_clr.onclick()
-  
-  addBtn('Exit')
-
-windows.ondblclick=function (){
-
-return false
-
 	
-}
- 
-  
-  let p
-  can.onmousedown=function(e){
-	let c=can.getContext("2d")
-	c.strokeStyle='#fff000'
-	let x = e.x - can.getBoundingClientRect().x
-	let y = e.y - can.getBoundingClientRect().y
-	c.strokeRect(x-4,y-4,8,8)
-	c.strokeStyle="#f00000"
-	if(p){
-		c.beginPath()
-		c.moveTo(p.x,p.y)
-		c.lineTo(x,y)
-		c.stroke()
-    }
-	p={x:x,y:y}
-  } 
-</script>
- 
+	<tr>
+		<td></td>
+		<td>
+			<input class="BTN" type="button" value="run" onclick="run(snd1,ins1,inp1);"/>  
+			<input class="BTN" type="button" value="replay" onclick="playSnd(snd1);" />
+			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
+			<input class="BTN" type="button" value="save" onclick="saveWave('snd1.wav',snd1,rate);" />
+		</td>  
+	</tr>
+	
+</table>
+
+<br><br>
+<table id="BLOCKSTR">
+	<tr>
+		<td>  notes: </td>
+		<td><input class="INPUT" type="text" value="" id="inp2" /> 
+		</td>
+	</tr>
+	
+	<tr>
+		<td></td>
+		<td>
+			<input class="BTN" type="button" value="run" onclick="run(snd2,ins2,inp2);" />  
+			<input class="BTN" type="button" value="replay" onclick="playSnd(snd2);"/>
+			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
+			<input class="BTN" type="button" value="save" onclick="saveWave('snd2.wav',snd2,rate);" />
+		</td>  
+	</tr>
+	
+</table>
+
 </body>
+<script src="./generalTools.js"></script>
+<script src="./audio.js"></script>
+<script src="./music.js"></script>
+<script src="./main.js"></script>
+</html>

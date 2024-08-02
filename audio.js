@@ -1,10 +1,10 @@
 
-export
+ 
 var rate = 44100 
 
 var audio_context = undefined
 
-var snd = makeSound(500)
+ 
 
 var isPlaying = false
 
@@ -28,7 +28,7 @@ function makeBom(N=8000,g=0.96,L=400){
 	return snd
 	
 }
-export
+
 function stopSnd()
 {
 	if(audio_context == undefined) return;
@@ -36,7 +36,7 @@ function stopSnd()
 	audio_context.close();
 	audio_context=undefined;	
 }
-export
+
 function playSnd(buf){
   initAudio()
   //if(isPlaying)return
@@ -99,7 +99,7 @@ function toInt16(s){
   }
   return new Int16Array(arr);
   }
-export
+
 function saveWave(name,data,rt){
    var L = data.length*2+36;
    var ww = new Int16Array(22+data.length);
@@ -118,4 +118,88 @@ function saveWave(name,data,rt){
     ww[22+k]=Math.round(30000*data[k]+Math.random()-0.5);
    //ww.set(new Int16Array(scale(data,30000)),22);
    saveArray(ww,name+".wav","bin");
+}
+
+
+function Filter(){
+    this.x = [0,0,0];
+    this.y = [0,0,0];
+	this.a = [1,0,0];
+    this.b = [1,0,0];
+    this.G = 1;
+   this.designRes = function(fr,bw){
+	 var R = Math.exp(-Math.PI*bw/rate);
+     var h = 2*R*Math.cos(2*Math.PI*fr/rate);
+     this.a = [1,0,0];
+     this.b = [1,h,-R*R];
+     this.G = (1-R)/(1+0.6*h);
+   }
+   this.designNotchRes = function(frn,bwn,fr,bw){
+	 var Rn = Math.exp(-Math.PI*bwn/rate);
+     var hn = 2*Rn*Math.cos(2*Math.PI*frn/rate);
+     var R  = Math.exp(-Math.PI*bw/rate);
+     var h  = 2*R*Math.cos(2*Math.PI*fr/rate);
+     this.a = [1,-hn,Rn*Rn];
+     this.b = [1,h,-R*R];
+     this.G = (1-R)/(1+0.6*h);
+   }
+   this.designFracDelay = function(d){
+     //console.log("actual delay d=",d);
+     var nu  = (1-d)/(1+d);
+     this.a = [nu,1,0];
+	 this.b = [1,-nu,0];
+	 this.G = 1;
+   }
+   this.designAllPass = function(fr){
+		//var wp = 2*Math.PI*fr/rate;
+        var B  = 1-2.0*fr/rate;//(1-wp)/(1+wp);
+		this.a = [B,-1,0];
+		this.b = [1,B,0];
+		this.G = 1;
+   }
+   this.designLowPass = function(g){
+		this.a = [1-g,0,0];
+		this.b = [1,g,0];
+		this.G = 1;
+   }
+   this.designLowPassFr = function(fr){
+	    var g = Math.exp(-2*fr*Math.PI/rate);
+		this.a = [1-g,0,0];
+		this.b = [1,g,0];
+		this.G = 1;
+   }
+    this.designLowPassZ = function(g){
+		this.a = [1,g,0];
+		this.b = [1,0,0];
+		this.G = 1.0/(1.0+g);
+   }
+   this.designDCKill = function(g){
+		this.a = [1,-1,0];
+		this.b = [1,g,0];
+		this.G = 1.0;
+   }
+   this.tic = function(v){
+		var oup = this.a[0]*v        
+		         +this.a[1]*this.x[1]
+				 +this.a[2]*this.x[2]
+		         +this.b[1]*this.y[1]
+				 +this.b[2]*this.y[2];
+		this.y[2]=this.y[1];
+		this.y[1]=oup;
+		this.x[2]=this.x[1];
+		this.x[1]=v;
+		return oup*this.G;	
+    }
+	this.tics =function(bb){
+		for(var k=0;k<bb.length;k++)
+			bb[k] = this.tic(bb[k]);
+	}
+}
+
+function addEcho(s,t,g){
+	t = t*rate
+	for(let k=0;k<s.length;k++){
+		if(k>s.length-3000)g*=0.999
+		s[k] += g * getV(s,k-t)
+	}
 }

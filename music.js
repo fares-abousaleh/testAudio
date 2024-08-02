@@ -1,5 +1,5 @@
-//--- not fully implemented yet ...
-import {playSnd,stopSnd,rate} from "./audio.js"
+ 
+ 
 	
 function getV(arr,t){
 	if(t<0||t>=arr.length-1)return 0
@@ -10,26 +10,11 @@ function getV(arr,t){
 	return (b-t)*arr[a]+(t-a)*arr[b]
 }
 
-// function makeExt(){
-	// let ext = new Float32Array(30000)
-	// let th  = new Float32Array(45)
-	// let dth = new Float32Array(th.length)
-	
-	// for(let i=0;i<dth.length;i++)
-		// dth[i]=rnd(900,1200)*6.0/rate
-	
-	// for(let k=0;k<ext.length;k++)
-		// for(let i=0;i<th.length;i++){
-			// ext[k] += Math.sin(th[i])*Math.exp(-5*dth[i])
-			// th[i]+=dth[i]
-		// }
-	// return ext
-// }
+ 
 
-// const Ext = makeExt()
 
-export
-function stringSound(fr,len){
+function StrIns(){
+	this.make=function(fr,len){
 	const n = Math.ceil( len * rate )
 	let snd = new Float32Array(n)
 	
@@ -39,20 +24,23 @@ function stringSound(fr,len){
 	var ext = 1
 	const g = Math.pow(0.01,1.0/n)
 	var mx = 0;
-	// var kk = rndInt(0,5000)
-	let old = 0,oldd=0,ex=0
+	let res = new Filter()
+	res.designRes(900,23  )
+	let lowp = new Filter()
+	lowp.designLowPass(0.23)
+	let A = 1
 	
 	for(let k=0;k<snd.length;k++,a*=g){
-		 if(rndDecide(0.1))ext=rnd()/(0.001*k+1)
-		 ext = 0.9*oldd+0.1*ext
-		 oldd = ext
-		 let b = getV(snd,k-perd/2 ) 
-		  b*=1.0/(1.0+0.001*Math.abs(b))
-		let u  =  ext  - b 
-		u = 0.13*old+0.87*u
-		old =  u
+		 if(A>0)A-=0.11/fr
+		 ext=res.tic(rnd()*A)
 		 
-		lop+=0.01*(1.0-lop)
+		 let b = getV(snd,k-perd ) 
+		   
+		let u  =  ext+((1-A)*b+A*lowp.tic(b)) 
+		 
+		 
+		 
+		 
 		snd[k]=u
 		let v = Math.abs(u)
 		if(v>mx)mx=v
@@ -72,6 +60,16 @@ function stringSound(fr,len){
 	
 	
 	return snd
+	}
+	
+	this.hist={}
+	
+	this.get=function(fr,L){
+		if(!this.hist[fr])this.hist[fr]={}
+		if(!this.hist[fr][L])
+			this.hist[fr][L]=this.make(fr,L)
+		return this.hist[fr][L]
+	}
 }
 
 function mixSnd(dest,src,pos,vol=1){
@@ -83,24 +81,36 @@ function mixSnd(dest,src,pos,vol=1){
 }
 
 
-function initMusic(s){
+function defScale(s){
 	let keys = {}
 	const ss = s.trim().replaceAll("\n"," ").split(/ +/) 
 	const step = 1.0 / parseFloat(ss[0])
 	for(let k=1;k<ss.length;k+=2){
-		keys[ss[k]] = Math.pow(2,parseFloat(ss[k+1]*step))
+		keys[ss[k]] = Math.pow(2,parseFloat(ss[k+1])*step)
 	}
 	return keys
 }
 
-function makeMusic(dest,keys,s,dt=1,ins=makeWind){
+function defScaleR(s){
+	let keys = {}
+	const ss = s.trim().replaceAll("\n"," ").split(/ +/) 
+	const step = 1.0 / parseFloat(ss[0])
+	for(let k=1;k<ss.length;k+=2){
+		keys[ss[k]] = parseFloat(ss[k+1])*step
+	}
+	return keys
+}
+
+function makeMusic(dest,keys,s,dt=1,ins){
 	let oct = 0
 	let tm  = dt
-	let fr  = 0
+	let fr  = -1
 	let pos = 0
+	let vol = 0.5
+	let vl  = 0.5
 	const BaseFr = 261.3
 	s+="S"
-	
+	console.log(s)
 	for(let k=0;k<s.length;k++)
 		if(s[k]==' ')continue
 		else
@@ -108,65 +118,103 @@ function makeMusic(dest,keys,s,dt=1,ins=makeWind){
 		else 
 		if(s[k]=='-')oct--
 		else
-		if(s[k]=='.')tm+=dt
+		if(s[k]=='.')  tm+=dt 
+		else
+		if('0123456789'.search(s[k])>=0)
+			vol=parseFloat(s[k])/10.0
 		else{
 			if(fr>0){
-				mixSnd( dest,ins(fr,(ins===stringSound)?0.6:tm),pos )
+				mixSnd( dest,ins.get(fr,tm),pos,vl  )
 				pos+=tm
-			}
-			fr = keys[s[k]] * BaseFr * Math.pow( 2, oct )
-			tm = dt	
+			}else if(fr==0)pos+=tm
+			if(keys[s[k]])
+				fr = keys[s[k]] * BaseFr * Math.pow( 2, oct )
+			else fr=0
+			tm = dt		
+			vl = vol 
 		}
 }
 
-function testMusic1(){
-	let snd = stringSound(800,4)
-	const dt = 0.1
-	let fr = 500
-	for( let k=0; k<30; k++,fr*=rnd(1.041,1.083)){
-		let s = stringSound(fr,dt)
-		mixSnd(snd,s,dt*k+dt,rnd(0.5,1))
-	}	return snd
-}
-
-const stdkeys = initMusic("6 c 0 C 0.5 d 1 D 1.5 u 1.75 f 2.5 F 3 g 3.5 G 4 v 4.25 a 4.5 A 5 w 5.25 b 5.5")
-	
-function testMusic()
-{
-	stdkeys.m = 9/16.0
-	stdkeys.s = 9/4.0
-	 let dest = new Float32Array(rate * 10)
-    console.log('init music..')
-	makeMusic(dest,stdkeys,"defmdfacdfm-A+dfm-afesdmfedeCdm...",0.085,stringSound )
-	 
-	console.log('init music done')
-	normalise(dest)
-	 
-	return dest
-}
-
  
-	
 
-export
-function makeWind(fr,L){
-	let n = Math.ceil( L*rate)
-	let snd = new Float32Array(n)
-	let th = 0
-	let dth = fr*Math.PI*2.0/rate
-	let a = 0
-	let t =0
-	let dt = Math.PI/n
-	const r = rnd(Math.PI)
-	const A = sat(500.0/fr,0,1)
-	for(let k=0;k<n;k++){
-		a = Math.tanh( 5*Math.sin(t) )*A
-		snd[k] = Math.tanh(a*Math.sin(th+a*0.6*(2+Math.sin(r+t))*Math.sin(th)))
-		th += dth * (1.0 + 0.006*Math.sin(10*t))
-		t+=dt
+const stdkeys = defScale("6 c 0 C 0.5 d 1 D 1.5 u 1.75 e 2 f 2.5 F 3 g 3.5 G 4 v 4.25 a 4.5 A 5 w 5.25 b 5.5")
+	
+//const stdkeysR = defScale("21 c 21 C 22 d 23 D 24 u 25 e 26 f 27 F 28 g 29 G 30 v 31 a 32 A 33 w 34 b 35")
+	
+  
+
+class InsWind{
+
+    constructor(){
+	   this.hist = {}
 	}
 	
-	return snd;
+	f(t){
+		return t*(1.3-t*t)*(1+t*(1+t))
+	}
+	
+	make(fr,L){
+		let dck = new Filter()
+		dck.designDCKill(0.9)
+		let n = Math.ceil( L*rate)
+		let snd = new Float32Array(n)
+		let th = 0
+		let dth = fr*Math.PI*2.0/rate
+		let a = 0
+		let t =0
+		let dt = Math.PI/n
+		const r = rnd(Math.PI)
+		const A = sat(500.0/fr,0,1)
+		for(let k=0;k<n;k++){
+			 
+			a = Math.tanh( 5*Math.sin(t) )*A 
+			snd[k]=a*dck.tic(this.f(Math.sin(th)*a*(1.0 + 0.00026*Math.sin(3*t))))
+			 
+			th += dth * (1.0 + 0.006*Math.sin(10*t))
+			t+=dt
+		}
+		normalise(snd)
+		return snd;
+	}
+	
+	get(fr,L){
+		if(!this.hist[fr])this.hist[fr]={}
+		if(!this.hist[fr][L])
+			this.hist[fr][L]=this.make(fr,L)
+		return this.hist[fr][L]
+	}
+	
+}
+
+class InsSqr extends InsWind{
+   
+   constructor(nfr=13,hi=15){
+	    super()
+		this.nfr = nfr
+		this.hi = hi
+   }	   
+   	
+   make(fr,L){
+	    const n = Math.ceil( L*rate)
+		const snd = new Float32Array(n)
+		const perd = rate/fr
+		let t = 0
+		const dck = new Filter()
+		dck.designDCKill( 0.95 )
+		const res  = new Filter()
+		res.designRes( this.nfr*fr,   0.5*fr)
+		const hi  = new Filter()
+		hi.designRes( this.hi*fr,   0.5*fr)
+		for(let k=0;k<n;k++,t+=1){
+			let v = (t%(perd*((1+0.0004*Math.sin(t*30.0/rate)))))-perd/4
+			let A = Math.sin(k*Math.PI/n)
+			v = dck.tic( v )
+			snd[k] = A*( res.tic( v ) + hi.tic( v) )
+		}
+		normalise(snd)
+		return snd
+   }	   
+
 }
 
 function normalise(v,vol=1.0){

@@ -54,6 +54,7 @@ function sat(v,a,b){
 	return v
 }
 
+
 //-- rects has center (x,y) and half dims: w,h 
 function intersectRects(A,B){
 	let res = (A.x-A.w >= B.x+B.w)||  // B:::A
