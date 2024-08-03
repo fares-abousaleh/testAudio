@@ -152,11 +152,42 @@ function Filter(){
 			bb[k] = this.tic(bb[k]);
 	}
 }
-
+/*-----------------------------------------
+	Linear Interpolation: 
+	get value of <arr> at position <t>
+	returns 0 if t < 0 or t >= length of array
+  ----------------------------------------*/
+function getV(arr,t){
+	if(t<0||t>=arr.length-1)return 0
+	
+	const a = Math.floor(t)
+	const b = a+1
+	
+	return (b-t)*arr[a]+(t-a)*arr[b]
+}
+/*-----------------------------------------
+	Adds echo to sound: 
+	<s> float32 array 
+	<t> is time delay in seconds
+	<g> coefficent in interval ]0,1[
+  ----------------------------------------*/
 function addEcho(s,t,g){
 	t = t*rate
 	for(let k=0;k<s.length;k++){
 		if(k>s.length-3000)g*=0.999
 		s[k] += g * getV(s,k-t)
 	}
+}
+/*-----------------------------------------
+	Mix sound <src> into sound <dest>
+	at position <pos> in seconds.
+	Mixed sound <src> will be multiplyed 
+	by <vol> coefficent.
+  ----------------------------------------*/
+function mixSnd(dest,src,pos,vol=1){
+	  pos = Math.round(rate * pos)
+	const n = Math.min( pos+src.length,dest.length)
+	
+	for(let k=pos;k<n;k++)
+		dest[k]+=vol*src[k-pos]
 }
