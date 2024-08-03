@@ -15,64 +15,7 @@ function getV(arr,t){
  
 
 
-function StrIns(){
-	this.make=function(fr,len){
-	const n = Math.ceil( len * rate )
-	let snd = new Float32Array(n)
-	
-	let perd =  rate *1.0/ fr
-	let lop =0.9973
-	var a = 1
-	var ext = 1
-	const g = Math.pow(0.01,1.0/n)
-	var mx = 0;
-	let res = new Filter()
-	res.designRes(900,23  )
-	let lowp = new Filter()
-	lowp.designLowPass(0.23)
-	let A = 1
-	
-	for(let k=0;k<snd.length;k++,a*=g){
-		 if(A>0)A-=0.11/fr
-		 ext=res.tic(rnd()*A)
-		 
-		 let b = getV(snd,k-perd ) 
-		   
-		let u  =  ext+((1-A)*b+A*lowp.tic(b)) 
-		 
-		 
-		 
-		 
-		snd[k]=u
-		let v = Math.abs(u)
-		if(v>mx)mx=v
-	}
-	if(mx>0){
-		mx=1.0/mx
-		let a = 1
-		let atk =0
-		const da = 2.0/snd.length
-		for(let k=0;k<snd.length;k++){
-			if(atk<1)atk+=0.02
-			a=(snd.length-k)*1.0/snd.length
-			snd[k]*=atk*mx*a;
-		}
-	}
-	
-	
-	
-	return snd
-	}
-	
-	this.hist={}
-	
-	this.get=function(fr,L){
-		if(!this.hist[fr])this.hist[fr]={}
-		if(!this.hist[fr][L])
-			this.hist[fr][L]=this.make(fr,L)
-		return this.hist[fr][L]
-	}
-}
+
 
 function mixSnd(dest,src,pos,vol=1){
 	  pos = Math.round(rate * pos)
@@ -141,7 +84,7 @@ function makeMusic(dest,keys,s,dt=1,ins){
 
 const stdkeys = defScale("6 c 0 C 0.5 d 1 D 1.5 u 1.75 e 2 f 2.5 F 3 g 3.5 G 4 v 4.25 a 4.5 A 5 w 5.25 b 5.5")
 	
- const stdkeysR  = defScale("24 c 24 C 25 d 26 D 28 u 29 e 31 f 34 F 36 g 38 G 40 v 42 a 43 A 45 w 46 b 47")
+const stdkeysR  = defScale("24 c 24 C 25 d 26 D 28 u 29 e 31 f 34 F 36 g 38 G 40 v 42 a 43 A 45 w 46 b 47")
 	
   
 
@@ -217,6 +160,66 @@ class InsSqr extends InsWind{
 		return snd
    }	   
 
+}
+
+class InsStr extends InsWind{
+	
+	constructor(a=400.0,b=900.0,lopg=0.23,g=0.999){
+		super()
+		this.frm1 = a
+		this.frm2 = b
+		this.lopg = lopg
+		this.g    = g
+	}
+	
+	make(fr,len){
+		// len is ignored !
+		const n = Math.ceil( 0.9* rate )
+		let snd = new Float32Array(n)
+		
+		let perd =  rate *1.0/ fr
+		let lop =0.9973
+		var a = 1
+		var ext = 1
+		const g = Math.pow(0.01,1.0/n)
+		var mx = 0;
+		let res1 = new Filter()
+		res1.designRes(this.frm1,this.frm1*0.05 )
+		let res2 = new Filter()
+		res2.designRes(this.frm2,this.frm2*0.05 )
+		let lowp = new Filter()
+		lowp.designLowPass(this.lopg)
+		let A = 1
+		
+		for(let k=0;k<snd.length;k++,a*=g){
+			 let v = rnd()*A
+			 let ext =res1.tic(v)/(0.001*k+1)
+			     ext+=res2.tic(v)/(0.01*k+1)
+			 let b = getV(snd,k-perd) 
+			 let u  =  ext+this.g*lowp.tic(b) 
+			 
+			 snd[k]=u
+			 v = Math.abs(u)
+			 if(v>mx)mx=v
+		}
+		
+		if(mx>0){
+			mx=1.0/mx
+			let a = 1
+			let atk =0
+			const da = 2.0/snd.length
+			for(let k=0;k<snd.length;k++){
+				if(atk<1)atk+=0.02
+				a=(snd.length-k)*1.0/snd.length
+				snd[k]*=atk*mx*a;
+			}
+		}
+		
+		
+		
+	return snd
+	}
+	
 }
 
 function normalise(v,vol=1.0){
