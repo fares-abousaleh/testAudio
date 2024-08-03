@@ -1,5 +1,7 @@
  
- 
+ /*----------------------------
+     author: Fares-Abousaleh  
+   -----------------------------*/
 	
 function getV(arr,t){
 	if(t<0||t>=arr.length-1)return 0
@@ -139,7 +141,7 @@ function makeMusic(dest,keys,s,dt=1,ins){
 
 const stdkeys = defScale("6 c 0 C 0.5 d 1 D 1.5 u 1.75 e 2 f 2.5 F 3 g 3.5 G 4 v 4.25 a 4.5 A 5 w 5.25 b 5.5")
 	
-//const stdkeysR = defScale("21 c 21 C 22 d 23 D 24 u 25 e 26 f 27 F 28 g 29 G 30 v 31 a 32 A 33 w 34 b 35")
+ const stdkeysR  = defScale("24 c 24 C 25 d 26 D 28 u 29 e 31 f 34 F 36 g 38 G 40 v 42 a 43 A 45 w 46 b 47")
 	
   
 
@@ -202,12 +204,12 @@ class InsSqr extends InsWind{
 		const dck = new Filter()
 		dck.designDCKill( 0.95 )
 		const res  = new Filter()
-		res.designRes( this.nfr*fr,   0.5*fr)
+		res.designRes( this.nfr*fr,   0.05* this.nfr*fr)
 		const hi  = new Filter()
-		hi.designRes( this.hi*fr,   0.5*fr)
+		hi.designRes( this.hi*fr,   0.05*this.hi*fr)
 		for(let k=0;k<n;k++,t+=1){
-			let v = (t%(perd*((1+0.0004*Math.sin(t*30.0/rate)))))-perd/4
 			let A = Math.sin(k*Math.PI/n)
+			let v = rnd(0.9,1)*(t%(perd*((1+0.0004*Math.sin(t*30.0/rate)))))-perd/4
 			v = dck.tic( v )
 			snd[k] = A*( res.tic( v ) + hi.tic( v) )
 		}
