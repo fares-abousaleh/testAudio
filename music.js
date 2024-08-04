@@ -2,6 +2,9 @@
  /*----------------------------
      author: Fares-Abousaleh  
    -----------------------------*/
+
+const BaseFr = 261.3
+
 /*-----------------------------------------
 	Reads a string <s> of the format:
 	T c1 v1 c2 v2 ... cn vn
@@ -10,6 +13,7 @@
 	c1,c2,...,cn are characters representing keys to be used
 	v1,v2,...,vn are floats representing the number of divisions from the start of octave
   ----------------------------------------*/	
+
 function defScale(s){
 	let keys = {}
 	const ss = s.trim().replaceAll("\n"," ").split(/ +/) 
@@ -47,16 +51,16 @@ function defScaleR(s){
     <ins> is the instrument object to be used.	
   ----------------------------------------*/	
 
-function makeMusic(dest,keys,s,dt=1,ins){
+function makeMusic(dest,s,dt=1,ins){
 	let oct = 0
 	let tm  = dt
-	let fr  = -1
+	let nt  = ','
 	let pos = 0
 	let vol = 0.5
 	let vl  = 0.5
-	const BaseFr = 261.3
+	
 	s+="S"
-	console.log(s)
+	 
 	for(let k=0;k<s.length;k++)
 		if(s[k]==' ')continue
 		else
@@ -69,13 +73,13 @@ function makeMusic(dest,keys,s,dt=1,ins){
 		if('0123456789'.search(s[k])>=0)
 			vol=parseFloat(s[k])/10.0
 		else{
-			if(fr>0){
-				mixSnd( dest,ins.make(fr,tm),pos,vl  )
+			if(nt!=','){
+				mixSnd( dest,ins.get(nt,oct,tm),pos,vl  )
 				pos+=tm
-			}else if(fr==0)pos+=tm
-			if(keys[s[k]])
-				fr = keys[s[k]] * BaseFr * Math.pow( 2, oct )
-			else fr=0
+			}else if(nt==',')pos+=tm
+			if(stdkeys[s[k]])
+				nt = s[k]
+			else nt=','
 			tm = dt		
 			vl = vol 
 		}
@@ -89,58 +93,74 @@ const stdkeysR  = defScale("24 c 24 C 25 d 26 D 28 u 29 e 31 f 34 F 36 g 38 G 40
 	
   
 
-class InsWind{
+class InsDrm{
 
     constructor(){
 	   this.hist = {}
+	   this.N = Math.round(0.1*rate)
+	   this.frs = {
+		              'c':[623 ,900 ,1300],
+					  'd':[3000,4122,2402],
+					  'e':[1000,2122,3402],
+					  'f':[723 ,832 ,1000],
+					  'g':[903 ,422, 522 ],
+					  'a':[1710,2422,4402],
+				      'C':[2623 ,1900 ,3300],
+					  'D':[4210,5122,4402],
+					  'F':[3000,5122,6402],
+					  'G':[2723 ,1832 ,7000],
+					  'A':[9103 ,8422, 4522 ],
+					  'b':[9710,11422,2402],
+					  'u':[9710,422,202],
+					  'v':[7710,2422,102],
+					  'w':[8710,1122,402],
+					  
+				  }
 	}
 	
-	f(t){
-		return t*(1.3-t*t)*(1+t*(1+t))
-	}
-	
-	make(fr,L){
-		let dck = new Filter()
-		dck.designDCKill(0.9)
-		let n = Math.ceil( L*rate)
-		let snd = new Float32Array(n)
-		let th = 0
-		let dth = fr*Math.PI*2.0/rate
-		let a = 0
-		let t =0
-		let dt = Math.PI/n
-		const r = rnd(Math.PI)
-		const A = sat(500.0/fr,0,1)
-		for(let k=0;k<n;k++){
-			 
-			a = Math.tanh( 5*Math.sin(t) )*A 
-			snd[k]=a*dck.tic(this.f(Math.sin(th)*a*(1.0 + 0.00026*Math.sin(3*t))))
-			 
-			th += dth * (1.0 + 0.006*Math.sin(10*t))
-			t+=dt
+	make(nt,oct,L){
+		let frs = this.frs[nt]
+		if(frs==undefined)return []
+		let snd = new Float32Array(this.N)
+		let th = [0,0,0]
+		const dth0 = Math.PI*2.0/rate
+		let dth = [ frs[0]*dth0, frs[1]*dth0, frs[2]*dth0 ]
+		 
+		for(let k=0;k<this.N;k++){	 
+			th[0] += dth[0]*rnd(0.9,1.1)
+			th[1] += dth[1]*rnd(0.9,1.1)
+			th[2] += dth[2]*rnd(0.9,1.1)
+			snd[k] = Math.sin(th[0])/(1+0.007*k)
+			       - Math.sin(th[1])/(1+0.01 *k)
+				   + Math.sin(th[2])/(1+0.04*k)
 		}
 		normalise(snd)
+		console.log("drm made so far:",this.hist)
 		return snd;
 	}
 	
-	get(fr,L){
-		if(!this.hist[fr])this.hist[fr]={}
-		if(!this.hist[fr][L])
-			this.hist[fr][L]=this.make(fr,L)
-		return this.hist[fr][L]
+	get(nt,oct,L){
+		if(!this.hist[nt+oct])
+			this.hist[nt+oct]=this.make(nt,oct,L)
+		return this.hist[nt+oct]
 	}
 	
 }
 
-class InsSqr extends InsWind{
+
+function freq(nt,oct){
+	return BaseFr * Math.pow(2,oct) * stdkeys[nt]
+}
+
+class InsSqr {
    
    constructor(nfr=13,hi=15){
-	    super()
 		this.nfr = nfr
 		this.hi = hi
    }	   
    	
-   make(fr,L){
+   get(nt,oct,L){    
+	   let fr = freq(nt,oct)
 	    const n = Math.ceil( L*rate)
 		const snd = new Float32Array(n)
 		const perd = rate/fr
@@ -148,12 +168,12 @@ class InsSqr extends InsWind{
 		const dck = new Filter()
 		dck.designDCKill( 0.95 )
 		const res  = new Filter()
-		let f1 = 900
+		let f1 = 2341
 		 
 		let frm1 = Math.ceil(f1/fr)*fr
 		res.designRes( frm1,   0.05* frm1)
 		const hi  = new Filter()
-		let f2 = 3900
+		let f2 = 4531
 		 
 		let frm2 = Math.ceil(f2/fr)*fr
 		hi.designRes( frm2,   0.05* frm2)
@@ -163,7 +183,7 @@ class InsSqr extends InsWind{
 			let v = rnd(0.9,1)*(t%(perd*((1+0.0004*Math.sin(t*30.0/rate)))))-perd/4
 			v = dck.tic( v )
 			 
-			snd[k] = A*( res.tic( v ) + 0.3*A * hi.tic( v) )
+			snd[k] = A*( res.tic( v ) +   hi.tic( v) )
 		}
 		normalise(snd)
 		return snd
@@ -171,10 +191,10 @@ class InsSqr extends InsWind{
 
 }
 
-class InsStr {
+class InsStr extends InsDrm{
 	
 	constructor(a=400.0,b=900.0,lopg=0.23,g=0.999,L=0.85){
-		 
+		super() 
 		this.frm1 = a
 		this.frm2 = b
 		this.lopg = lopg
@@ -182,7 +202,7 @@ class InsStr {
 		this.N = Math.round(L*rate)
 		this.imp = new Float32Array(this.N)
 		this.im = new Float32Array(this.N)
-		this.makeImpulse("123 2.3 100 1.9 200 1.9 321 0.8 411 0.7 545 .93 711.01 0.1 900 0.95  1102 0.3 1212 0.71 2341 0.53 3411 0.52")
+		this.makeImpulse("123 0.3 100 0.9 200 0.9 321 0.8 411 0.7 545 .93 711.01 0.1 900 0.95  1102 0.3 1212 0.71 2341 0.4 2461 0.5 2931 0.1 3105 0.6    3411 0.52")
 		//saveWave("imp",this.imp,rate)
 	}
 	
@@ -198,7 +218,7 @@ class InsStr {
 			this.im[k]=res.tic(rnd())*a 
 			 
 		}
-		normalise(this.im,Math.exp(-fr*0.00071))
+		normalise(this.im,Math.exp(-fr*0.00031))
 		mixSnd(this.imp,this.im,0)
 	}
 	
@@ -216,10 +236,10 @@ class InsStr {
 		delete this.im
 	}
 	
-	make(fr,len){
+	make(nt,oct,len){
 		// len is ignored !
 		let snd = new Float32Array(this.N)
-		
+		let fr = freq(nt,oct) 
 		let perd =  rate *1.0/ fr
 		let lop =0.9973
 		var a = 1
@@ -254,7 +274,7 @@ class InsStr {
 		}
 		
 		
-		
+		console.log("str made so far:",this.hist)
 	return snd
 	}
 	
