@@ -8,7 +8,7 @@ const snd2 = new Float32Array(13*rate)
 
 const snd3 = new Float32Array(13*rate)
 
-const ins1 = new InsSqr(5,9 )
+const ins1 = new InsSqr(925, 2119 )
 
 const ins2 = new InsStr(1330,2513.1,0.36,0.9972)
 

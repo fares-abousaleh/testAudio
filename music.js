@@ -52,7 +52,8 @@ function defScaleR(s){
   ----------------------------------------*/	
 
 function makeMusic(dest,s,dt=1,ins){
-	let oct = 0
+	let oct = 4
+	let oc  = 4
 	let tm  = dt
 	let nt  = ','
 	let pos = 0
@@ -74,7 +75,7 @@ function makeMusic(dest,s,dt=1,ins){
 			vol=parseFloat(s[k])/10.0
 		else{
 			if(nt!=','){
-				mixSnd( dest,ins.get(nt,oct,tm),pos,vl  )
+				mixSnd( dest,ins.get(nt,oc,tm),pos,vl  )
 				pos+=tm
 			}else if(nt==',')pos+=tm
 			if(stdkeys[s[k]])
@@ -82,6 +83,7 @@ function makeMusic(dest,s,dt=1,ins){
 			else nt=','
 			tm = dt		
 			vl = vol 
+			oc = oct
 		}
 }
 
@@ -149,14 +151,14 @@ class InsDrm{
 
 
 function freq(nt,oct){
-	return BaseFr * Math.pow(2,oct) * stdkeys[nt]
+	return BaseFr * Math.pow(2,oct-4) * stdkeys[nt]
 }
 
 class InsSqr {
    
-   constructor(nfr=13,hi=15){
-		this.nfr = nfr
-		this.hi = hi
+   constructor(frm1=13,frm2=15){
+		this.frm1 = frm1
+		this.frm2 = frm2
    }	   
    	
    get(nt,oct,L){    
@@ -167,16 +169,19 @@ class InsSqr {
 		let t = 0
 		const dck = new Filter()
 		dck.designDCKill( 0.95 )
-		const res  = new Filter()
-		let f1 = 2341
-		 
-		let frm1 = Math.ceil(f1/fr)*fr
-		res.designRes( frm1,   0.05* frm1)
+		
+		const res  = new Filter() 
+		let frm1 = this.frm1
+		//while(frm1<=1.05*fr)frm1*=2
+		res.designRes( frm1, 0.1 * frm1 ) 
+		
 		const hi  = new Filter()
-		let f2 = 4531
+		let frm2 = this.frm2
+		//while(frm2<=1.05*fr)frm2*=2
+		hi.designRes( frm2, 0.15* frm2  )
+		console.log("frm1=",frm1,"   frm2=",frm2)
 		 
-		let frm2 = Math.ceil(f2/fr)*fr
-		hi.designRes( frm2,   0.05* frm2)
+		
 		for(let k=0;k<n;k++,t+=1){
 			
 			let A = Math.sin(k*Math.PI/n)
