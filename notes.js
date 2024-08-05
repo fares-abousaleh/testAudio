@@ -1,0 +1,1 @@
+let s1 =  "+  1b..+C 3D.1F. 3g,1ec 4d..1F  -a+d-ad d+d-a-a+ 1a5F1e3d  5g..1a b.ag b.fg  5d1gab  g5d1Dd 5c1fga  f5g1-ag 5b+1DGa 2b..1C - b..."

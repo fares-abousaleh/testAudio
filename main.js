@@ -10,7 +10,7 @@ const snd3 = new Float32Array(13*rate)
 
 const ins1 = new InsSqr(925, 2119 )
 
-const ins2 = new InsStr(1330,2513.1,0.36,0.9972)
+const ins2 = new InsStr(1330,2513.1,0.26,0.9999 )
 
 const ins3 = new InsDrm()
 
@@ -21,7 +21,8 @@ const ins3 = new InsDrm()
 function run(snd,ins,inp){
 	  
 	snd.fill(0)
-	makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins)
+	let res = makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins)
+	if(!res)alert("errors in notes")
 	if(ins==ins1){
 	addEcho(snd,0.27   , 0.1     )
 	addEcho(snd,0.271  , -0.11  )

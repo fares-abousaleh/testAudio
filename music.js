@@ -55,6 +55,7 @@ function makeMusic(dest,s,dt=1,ins){
 	let oct = 4
 	let oc  = 4
 	let tm  = dt
+	let dtn  = dt
 	let nt  = ','
 	let pos = 0
 	let vol = 0.5
@@ -69,10 +70,16 @@ function makeMusic(dest,s,dt=1,ins){
 		else 
 		if(s[k]=='-')oct--
 		else
-		if(s[k]=='.')  tm+=dt 
+		if(s[k]=='.')  tm+=dtn 
 		else
 		if('0123456789'.search(s[k])>=0)
 			vol=parseFloat(s[k])/10.0
+		else if(s[k]==':'){
+			k++
+			if('0123456789'.search(s[k])>=0)
+			dtn = dt/parseInt(s[k])
+			else return false 
+		}
 		else{
 			if(nt!=','){
 				mixSnd( dest,ins.get(nt,oc,tm),pos,vl  )
@@ -81,13 +88,13 @@ function makeMusic(dest,s,dt=1,ins){
 			if(stdkeys[s[k]])
 				nt = s[k]
 			else nt=','
-			tm = dt		
+			tm = dtn		
 			vl = vol 
 			oc = oct
 		}
+	return true
 }
 
- 
 
 const stdkeys = defScale("6 c 0 C 0.5 d 1 D 1.5 u 1.75 e 2 f 2.5 F 3 g 3.5 G 4 v 4.25 a 4.5 A 5 w 5.25 b 5.5")
 	
@@ -160,7 +167,10 @@ class InsSqr {
 		this.frm1 = frm1
 		this.frm2 = frm2
    }	   
-   	
+   waveform(t,perd){
+	   const p=perd*0.9
+	   return (t<p?t:(perd-t)*p/(perd-p)) - p*perd/4.0
+   }		
    get(nt,oct,L){    
 	   let fr = freq(nt,oct)
 	    const n = Math.ceil( L*rate)
@@ -172,12 +182,12 @@ class InsSqr {
 		
 		const res  = new Filter() 
 		let frm1 = this.frm1
-		//while(frm1<=1.05*fr)frm1*=2
+		 while(frm1< 2*fr)frm1*=1.12
 		res.designRes( frm1, 0.1 * frm1 ) 
 		
 		const hi  = new Filter()
 		let frm2 = this.frm2
-		//while(frm2<=1.05*fr)frm2*=2
+		 while(frm2< 4*fr)frm2*=1.12
 		hi.designRes( frm2, 0.15* frm2  )
 		console.log("frm1=",frm1,"   frm2=",frm2)
 		 
@@ -207,14 +217,14 @@ class InsStr extends InsDrm{
 		this.N = Math.round(L*rate)
 		this.imp = new Float32Array(this.N)
 		this.im = new Float32Array(this.N)
-		this.makeImpulse("123 0.3 100 0.9 200 0.9 321 0.8 411 0.7 545 .93 711.01 0.1 900 0.95  1102 0.3 1212 0.71 2341 0.4 2461 0.5 2931 0.1 3105 0.6    3411 0.52")
-		//saveWave("imp",this.imp,rate)
+		this.makeImpulse(" 231 1.3 316 0.6 411 0.9    545 .93 711.01 0.1 900 0.95  1102 0.03 1212 0.71 2341 0.4 2461 0.05 2931 0.1 3105 0.6    3411 0.052  4210.0 0.6")
+		saveWave("imp",this.imp,rate)
 	}
 	
 	addImpulse(fr,dec){
 		console.log("fr:",fr,"dec:",dec)
 		const res = new Filter()
-		res.designRes(fr,0.02*fr)
+		res.designRes(fr,Math.pow(0.002,100.0/fr)*fr)
 		let a = 1
 		if(rndDecide(0.5))a=-1
 		let g = Math.pow(0.01 ,1.0/(rate*dec))
@@ -239,6 +249,10 @@ class InsStr extends InsDrm{
 		}
 		normalise(this.imp)
 		delete this.im
+		this.imp = this.imp.subarray(5000)
+		let dck = new Filter()
+		dck.designDCKill(0.97)
+		dck.tics(this.imp)
 	}
 	
 	make(nt,oct,len){
@@ -249,19 +263,18 @@ class InsStr extends InsDrm{
 		let lop =0.9973
 		var a = 1
 		var ext = 1
-		const g = Math.pow(0.01,500.0/(fr*this.N))
+		const g = Math.pow(this.g,500.0/fr)
 		var mx = 0;
 		
 		let lowp = new Filter()
 		lowp.designLowPass(this.lopg)
-		// let res = new Filter()
-		// res.designRes(fr,12*fr)
-		let A = 1
+		const lo = Math.exp(-fr/1000.0)
 		
-		for(let k=0;k<snd.length;k++,a*=g){
-			 let ext =   getV(this.imp,k )   
+		for(let k=0;k<snd.length;k++){
+			 let ext =    getV(this.imp, k )  
 			 let b = getV(snd,k-perd) 
-			 let v  = ext +this.g*lowp.tic(b) 
+			 b += lo*(lowp.tic(b)-b) 
+			 let v  = ext +g*b 
 			 snd[k]=v
 			 v = Math.abs(v)
 			 if(v>mx)mx=v
