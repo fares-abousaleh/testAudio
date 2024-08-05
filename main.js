@@ -19,15 +19,15 @@ const ins3 = new InsDrm()
 	 to buffer <snd> using intrument <ins>
    -----------------------------*/
 function run(snd,ins,inp){
-	  
+	initAudio()  
 	snd.fill(0)
 	let res = makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins)
 	if(!res)alert("errors in notes")
 	if(ins==ins1){
-	addEcho(snd,0.27   , 0.1     )
-	addEcho(snd,0.271  , -0.11  )
-	addEcho(snd,0.2371 , -0.12  )
-	addEcho(snd,0.23   , 0.1    )
+		addEcho(snd,0.27   , 0.1     )
+		addEcho(snd,0.271  , -0.11  )
+		addEcho(snd,0.2371 , -0.12  )
+		addEcho(snd,0.23   , 0.1    )
 	}
 	normalise(snd,0.24)
 	playSnd(snd)

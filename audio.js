@@ -72,7 +72,7 @@ function saveWave(name,data,rt){
    ww.set(toInt16("data"),18);
    ww.set(toInt16(2*data.length),20); 
    for(var k=0;k<data.length;k++)
-    ww[22+k]=Math.round(30000*data[k]+Math.random()-0.5);
+    ww[22+k]=Math.round(32000*data[k]);
    //ww.set(new Int16Array(scale(data,30000)),22);
    saveArray(ww,name+".wav","bin");
 }

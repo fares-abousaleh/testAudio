@@ -4,6 +4,7 @@
    -----------------------------*/
 
 const BaseFr = 261.3
+var   Transp = 1.0
 
 /*-----------------------------------------
 	Reads a string <s> of the format:
@@ -54,16 +55,18 @@ function defScaleR(s){
 function makeMusic(dest,s,dt=1,ins){
 	let oct = 4
 	let oc  = 4
-	let tm  = dt
+	let tm  = 0
 	let dtn  = dt
 	let nt  = ','
 	let pos = 0
 	let vol = 0.5
 	let vl  = 0.5
-	
+	let tr = 1.0
+	Transp = 1.0
 	s+="S"
-	 
-	for(let k=0;k<s.length;k++)
+	let k=-1 
+	while(k<s.length-1){
+		k++
 		if(s[k]==' ')continue
 		else
 		if(s[k]=='+')oct++
@@ -72,6 +75,11 @@ function makeMusic(dest,s,dt=1,ins){
 		else
 		if(s[k]=='.')  tm+=dtn 
 		else
+		if(s[k]=='/'){
+			k++
+			tr = stdkeys[s[k]]
+			if(tr==undefined)return false	
+		}else
 		if('0123456789'.search(s[k])>=0)
 			vol=parseFloat(s[k])/10.0
 		else if(s[k]==':'){
@@ -81,17 +89,20 @@ function makeMusic(dest,s,dt=1,ins){
 			else return false 
 		}
 		else{
-			if(nt!=','){
-				mixSnd( dest,ins.get(nt,oc,tm),pos,vl  )
+			if(tm!=0){
+				if(nt!=',')
+					mixSnd( dest,ins.get(nt,oc,tm),pos,vl  )
 				pos+=tm
-			}else if(nt==',')pos+=tm
+			}
 			if(stdkeys[s[k]])
 				nt = s[k]
 			else nt=','
 			tm = dtn		
 			vl = vol 
 			oc = oct
+			Transp = tr
 		}
+	}
 	return true
 }
 
@@ -139,9 +150,9 @@ class InsDrm{
 			th[0] += dth[0]*rnd(0.9,1.1)
 			th[1] += dth[1]*rnd(0.9,1.1)
 			th[2] += dth[2]*rnd(0.9,1.1)
-			snd[k] = Math.sin(th[0])/(1+0.007*k)
-			       - Math.sin(th[1])/(1+0.01 *k)
-				   + Math.sin(th[2])/(1+0.04*k)
+			snd[k] = Math.sin(th[0])/(1+0.009*k)
+			       - Math.sin(th[1])/(1+0.03 *k)
+				   + Math.sin(th[2])/(1+0.09*k)
 		}
 		normalise(snd)
 		//console.log("drm made so far:",this.hist)
@@ -158,7 +169,7 @@ class InsDrm{
 
 
 function freq(nt,oct){
-	return BaseFr * Math.pow(2,oct-4) * stdkeys[nt]
+	return Transp * BaseFr * Math.pow(2,oct-4) * stdkeys[nt]
 }
 
 class InsSqr {
@@ -207,10 +218,9 @@ class InsSqr {
 
 }
 
-class InsStr extends InsDrm{
+class InsStr {
 	
-	constructor(a=400.0,b=900.0,lopg=0.23,g=0.999,L=0.85){
-		super() 
+	constructor(a=400.0,b=900.0,lopg=0.23,g=0.999,L=0.85){ 
 		this.frm1 = a
 		this.frm2 = b
 		this.lopg = lopg
@@ -218,53 +228,10 @@ class InsStr extends InsDrm{
 		this.N = Math.round(L*rate)
 		this.imp = new Float32Array(this.N)
 		this.im = new Float32Array(this.N)
-		// this.makeImpulse("  711  0.73  900 0.8295  "  
-		                  // + "2102 0.83 3212 0.871 " 
-						 "1412 0.83 2212 0.871 "+
-						 "2341 0.34 2461 0.75 "+
-						 "2931 0.51 3105 0.16 "+
-						 "3411 0.452  4210 0.26"+
-						 "5411 0.352  6210 0.36"+
-						 "7411 0.152  8210 0.16" 
-						  // )
-		 //saveWave("imp",this.imp,rate)
 	}
 	
-	addImpulse(fr,dec){
-		console.log("fr:",fr,"dec:",dec)
-		const res = new Filter()
-		res.designRes(fr,0.002*fr)
-		let a = 1
-		 
-		//let g = Math.pow(0.0003 ,1.0/(rate*dec))
-		const da = 1.0/(rate*dec) 
-		for(let k=0;k<this.N  ;k++){
-			this.im[k]=res.tic(rnd()*a) 
-			if(a>da)a-=da
-		}
-		normalise(this.im,Math.exp(-fr*0.01))
-		mixSnd(this.imp,this.im,0 )
-	}
 	
-	makeImpulse(s){
-		this.imp.fill(0)
-		let ss = s.trim().split(/ +/)
-		for(let i=0;i<ss.length;i+=2)
-			this.addImpulse(parseFloat(ss[i]),parseFloat(ss[i+1]))
-		let b=0
-		for(let k=0;k<100.0;k++ ){
-			this.imp[k]*= b
-			 b+=0.01
-		}
-		normalise(this.imp)
-		delete this.im
-		//this.imp = this.imp.subarray(5000)
-		let dck = new Filter()
-		dck.designDCKill(0.97)
-		dck.tics(this.imp)
-	}
-	
-	make(nt,oct,len){
+	get(nt,oct,len){
 		// len is ignored !
 		let snd = new Float32Array(this.N)
 		let fr = freq(nt,oct) 
@@ -289,7 +256,7 @@ class InsStr extends InsDrm{
 		for(let k=0;k<snd.length;k++){
 			 
 			   ext = rnd()
-  			   ext = 0.9 *res1.tic(ext)/(0.001*k+1)
+  			   ext = 0.9 *res1.tic(ext)/(0.003*k+1)
 			       - 0.9 *res2.tic(ext)/(0.01*k+1) 
 			   ext =    dck.tic( ext ) 
 			   
