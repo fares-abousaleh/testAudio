@@ -144,7 +144,7 @@ class InsDrm{
 				   + Math.sin(th[2])/(1+0.04*k)
 		}
 		normalise(snd)
-		console.log("drm made so far:",this.hist)
+		//console.log("drm made so far:",this.hist)
 		return snd;
 	}
 	
@@ -167,9 +167,8 @@ class InsSqr {
 		this.frm1 = frm1
 		this.frm2 = frm2
    }	   
-   waveform(t,perd){
-	   const p=perd*0.9
-	   return (t<p?t:(perd-t)*p/(perd-p)) - p*perd/4.0
+   waveform(t,perd){ 
+	   return t% perd - perd/2
    }		
    get(nt,oct,L){    
 	   let fr = freq(nt,oct)
@@ -191,11 +190,13 @@ class InsSqr {
 		hi.designRes( frm2, 0.15* frm2  )
 		console.log("frm1=",frm1,"   frm2=",frm2)
 		 
+		let rr =1
 		
 		for(let k=0;k<n;k++,t+=1){
 			
 			let A = Math.sin(k*Math.PI/n)
-			let v = rnd(0.9,1)*(t%(perd*((1+0.0004*Math.sin(t*30.0/rate)))))-perd/4
+			 
+			let v =  this.waveform(t,perd*(1+0.0004*Math.sin(t*30.0/rate))) 
 			v = dck.tic( v )
 			 
 			snd[k] = A*( res.tic( v ) +   hi.tic( v) )
@@ -217,24 +218,32 @@ class InsStr extends InsDrm{
 		this.N = Math.round(L*rate)
 		this.imp = new Float32Array(this.N)
 		this.im = new Float32Array(this.N)
-		this.makeImpulse(" 231 1.3 316 0.6 411 0.9    545 .93 711.01 0.1 900 0.95  1102 0.03 1212 0.71 2341 0.4 2461 0.05 2931 0.1 3105 0.6    3411 0.052  4210.0 0.6")
-		//saveWave("imp",this.imp,rate)
+		// this.makeImpulse("  711  0.73  900 0.8295  "  
+		                  // + "2102 0.83 3212 0.871 " 
+						 "1412 0.83 2212 0.871 "+
+						 "2341 0.34 2461 0.75 "+
+						 "2931 0.51 3105 0.16 "+
+						 "3411 0.452  4210 0.26"+
+						 "5411 0.352  6210 0.36"+
+						 "7411 0.152  8210 0.16" 
+						  // )
+		 //saveWave("imp",this.imp,rate)
 	}
 	
 	addImpulse(fr,dec){
 		console.log("fr:",fr,"dec:",dec)
 		const res = new Filter()
-		res.designRes(fr,Math.pow(0.002,100.0/fr)*fr)
+		res.designRes(fr,0.002*fr)
 		let a = 1
-		if(rndDecide(0.5))a=-1
-		let g = Math.pow(0.01 ,1.0/(rate*dec))
 		 
-		for(let k=0;k<this.N;k++,a*=g){
-			this.im[k]=res.tic(rnd())*a 
-			 
+		//let g = Math.pow(0.0003 ,1.0/(rate*dec))
+		const da = 1.0/(rate*dec) 
+		for(let k=0;k<this.N  ;k++){
+			this.im[k]=res.tic(rnd()*a) 
+			if(a>da)a-=da
 		}
-		normalise(this.im,Math.exp(-fr*0.00031))
-		mixSnd(this.imp,this.im,0)
+		normalise(this.im,Math.exp(-fr*0.01))
+		mixSnd(this.imp,this.im,0 )
 	}
 	
 	makeImpulse(s){
@@ -249,7 +258,7 @@ class InsStr extends InsDrm{
 		}
 		normalise(this.imp)
 		delete this.im
-		this.imp = this.imp.subarray(5000)
+		//this.imp = this.imp.subarray(5000)
 		let dck = new Filter()
 		dck.designDCKill(0.97)
 		dck.tics(this.imp)
@@ -260,20 +269,33 @@ class InsStr extends InsDrm{
 		let snd = new Float32Array(this.N)
 		let fr = freq(nt,oct) 
 		let perd =  rate *1.0/ fr
-		let lop =0.9973
+		 
 		var a = 1
-		var ext = 1
-		const g = Math.pow(this.g,500.0/fr)
+		var ext = 0
+		const g =  Math.pow(this.g,perd/30.0)
 		var mx = 0;
-		
-		let lowp = new Filter()
-		lowp.designLowPass(this.lopg)
-		const lo = Math.exp(-fr/1000.0)
-		
+		const dck = new Filter()
+		dck.designDCKill(0.95)
+		 let lowp = new Filter()
+		 lowp.designLowPass( this.lopg  )
+		  
+		 const res1 = new Filter()
+		 const res2 = new Filter()
+		 res1.designRes(this.frm1,0.1*this.frm1)
+		 res2.designRes(this.frm2,0.1*this.frm2)
+		 
+		const lo = Math.exp(-fr/100.0)
+		 const r = rnd(0,this.imp.length/3)
 		for(let k=0;k<snd.length;k++){
-			 let ext =    getV(this.imp, k )  
-			 let b = getV(snd,k-perd) 
-			 b += lo*(lowp.tic(b)-b) 
+			 
+			   ext = rnd()
+  			   ext = 0.9 *res1.tic(ext)/(0.001*k+1)
+			       - 0.9 *res2.tic(ext)/(0.01*k+1) 
+			   ext =    dck.tic( ext ) 
+			   
+			 let b =  getV(snd,k-perd) 
+			  b=lowp.tic(b)
+			  
 			 let v  = ext +g*b 
 			 snd[k]=v
 			 v = Math.abs(v)
@@ -292,7 +314,7 @@ class InsStr extends InsDrm{
 		}
 		
 		
-		console.log("str made so far:",this.hist)
+		//console.log("str made so far:",this.hist)
 	return snd
 	}
 	
