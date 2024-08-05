@@ -40,6 +40,10 @@ document.body.onload = function(){
 	tunit_inp.value = "0.15"
 }
 
+ 
+
 document.body.ondblclick = function(){
-	fullScreen(document.body)
+	 
+		document.body.requestFullscreen()
+	 
 }

@@ -218,7 +218,7 @@ class InsStr extends InsDrm{
 		this.imp = new Float32Array(this.N)
 		this.im = new Float32Array(this.N)
 		this.makeImpulse(" 231 1.3 316 0.6 411 0.9    545 .93 711.01 0.1 900 0.95  1102 0.03 1212 0.71 2341 0.4 2461 0.05 2931 0.1 3105 0.6    3411 0.052  4210.0 0.6")
-		saveWave("imp",this.imp,rate)
+		//saveWave("imp",this.imp,rate)
 	}
 	
 	addImpulse(fr,dec){

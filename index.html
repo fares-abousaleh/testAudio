@@ -28,7 +28,8 @@
 			<input class="BTN" type="button" value="run" onclick="run(snd1,ins1,inp1);"/>  
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd1);" />
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
-			<input class="BTN" type="button" value="save" onclick="saveWave('snd1.wav',snd1,rate);" />
+			<input class="BTN" type="button" value="export" onclick="saveWave('snd1.wav',snd1,rate);" />
+			<input class="BTN" type="button" value="random song" onclick="inp1.value=someNotes[rndInt(0,someNotes.length)];" />
 		</td>  
 	</tr>
 	
@@ -48,7 +49,7 @@
 			<input class="BTN" type="button" value="run" onclick="run(snd2,ins2,inp2);" />  
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd2);"/>
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
-			<input class="BTN" type="button" value="save" onclick="saveWave('snd2.wav',snd2,rate);" />
+			<input class="BTN" type="button" value="export" onclick="saveWave('snd2.wav',snd2,rate);" />
 		</td>  
 	</tr>
 	
@@ -70,7 +71,7 @@
 			<input class="BTN" type="button" value="run" onclick="run(snd3,ins3,inp3);" />  
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd3);"/>
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
-			<input class="BTN" type="button" value="save" onclick="saveWave('snd3.wav',snd3,rate);" />
+			<input class="BTN" type="button" value="export" onclick="saveWave('snd3.wav',snd3,rate);" />
 		</td>  
 	</tr>
 	
@@ -84,5 +85,6 @@ time unit: <input class="INPUT" style="width:6rem;height:2rem;" type="text" valu
 <script src="./generalTools.js"></script>
 <script src="./audio.js"></script>
 <script src="./music.js"></script>
+<script src="./notes.js"></script>
 <script src="./main.js"></script>
 </html>
