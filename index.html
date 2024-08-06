@@ -50,6 +50,7 @@
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd2);"/>
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
 			<input class="BTN" type="button" value="export" onclick="saveWave('snd2.wav',snd2,rate);" />
+			<input class="BTN" type="button" value="random song" onclick="inp2.value=someNotes[rndInt(0,someNotes.length)];" />
 		</td>  
 	</tr>
 	
@@ -78,9 +79,23 @@
 	
 </table>
 <br><hr><br>
-
-
 time unit: <input class="INPUT" style="width:6rem;height:2rem;" type="text" value="0.17" id="tunit_inp"/> 
+<input class="BTN" type="button" value="full screen" onclick="document.body.requestFullscreen();"/>
+<input class="BTN" type="button" value="exit full screen" onclick="document.exitFullscreen();"/>
+<br>
+
+<table>
+<tr>
+<td>
+volume: 
+</td>
+<td style="align:left;">
+<progress class="BTN" width="500px" id="vol_progress" min="0" value="33" max="100" >volume</progress>
+</td>
+</tr>
+</table>
+
+
 </body>
 <script src="./generalTools.js"></script>
 <script src="./audio.js"></script>

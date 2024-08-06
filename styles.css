@@ -1,7 +1,7 @@
 *{
 	 
   background: #2F0000;
-  color:#ff8121; 
+  color:#ff7121; 
   padding-left: 4px;
   margin:1px;
   text-decoration: none;
@@ -9,12 +9,31 @@
   font-family:"Courier";
 }
 
+progress {
+  border: none;
+  width: 500px;
+  height: 60px;
+  background: #200000;
+   
+}
+
+progress::-webkit-progress-bar {
+            background-color: #300000;
+        }
+
+progress::-webkit-progress-value {
+   -webkit-appearance: none;
+   background: #600000;
+  color:#200000; 
+  
+}
+
 
  .INPUT {
   align-items: center;
   background-image: linear-gradient(35deg,#1F000f, #3B0001  ,#10000f);
   border: 1px solid #7f0000;
-  color:#ef5000; 
+  color:#ff7000; 
   padding-left: 4px;
   margin:1px;
   text-decoration: none;
@@ -27,13 +46,13 @@
    
 }
 h1{
-	font-size:2rem;
+	font-size:1.8rem;
 	text-align:center;
 	font-family:"Times";
 	font-style:italic;
 	color:#ff8121;
-	padding-bottom:2rem;
-	padding-top:2rem;
+	padding-bottom:1rem;
+	padding-top:1rem;
 	background-image: linear-gradient(125deg,#1F0000, #3B0000  ,#100000);
     user-select:none;
 }

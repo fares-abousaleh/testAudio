@@ -201,15 +201,20 @@ class InsSqr {
 		hi.designRes( frm2, 0.15* frm2  )
 		console.log("frm1=",frm1,"   frm2=",frm2)
 		 
-		let rr =1
-		
+		let rr =0
+		let r  =0
 		for(let k=0;k<n;k++,t+=1){
 			
 			let A = Math.sin(k*Math.PI/n)
 			 
 			let v =  this.waveform(t,perd*(1+0.0004*Math.sin(t*30.0/rate))) 
 			v = dck.tic( v )
-			 
+			
+			rr+=rnd(0.1,0.9)*0.001
+			r += 0.0001*(rr-r)
+			if(rr>0.1)rr=0
+			res.designRes( frm1*(1+r), 0.15* frm1  )			
+			hi.designRes( frm2*(1+r*2), 0.15* frm2  )			
 			snd[k] = A*( res.tic( v ) +   hi.tic( v) )
 		}
 		normalise(snd)
@@ -256,8 +261,8 @@ class InsStr {
 		for(let k=0;k<snd.length;k++){
 			 
 			   ext = rnd()
-  			   ext = 0.9 *res1.tic(ext)/(0.003*k+1)
-			       - 0.9 *res2.tic(ext)/(0.01*k+1) 
+  			   ext =   0.9 *res1.tic(ext)/(0.003*k+1)
+			         - 0.9 *res2.tic(ext)/(0.01*k+1) 
 			   ext =    dck.tic( ext ) 
 			   
 			 let b =  getV(snd,k-perd) 

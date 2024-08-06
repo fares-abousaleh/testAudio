@@ -14,10 +14,11 @@ const ins2 = new InsStr(1330, 513.1,0.26,0.99999  )
 
 const ins3 = new InsDrm()
 
- /*----------------------------
+ /*------------------------------------------
      compile notes in input <inp>
 	 to buffer <snd> using intrument <ins>
-   -----------------------------*/
+   ------------------------------------------*/
+   
 function run(snd,ins,inp){
 	initAudio()  
 	snd.fill(0)
@@ -40,10 +41,13 @@ document.body.onload = function(){
 	tunit_inp.value = "0.15"
 }
 
- 
-
-document.body.ondblclick = function(){
-	 
-		document.body.requestFullscreen()
-	 
+vol_progress.onmousedown=function(e){
+	initAudio()
+	if(e.buttons!=1)return
+	const r = vol_progress.getBoundingClientRect()
+	let x = e.pageX - r.left
+	vol_progress.value = Math.round( x * 100.0 / (r.right-r.left) ) 
+	setVolume(0.01*vol_progress.value)
 }
+
+vol_progress.onmousemove = vol_progress.onmousedown

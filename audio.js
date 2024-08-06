@@ -6,7 +6,7 @@ var rate = 44100
 
 var audio_context = undefined
 
- 
+var gainNode = undefined 
 
 function stopSnd()
 {
@@ -22,12 +22,24 @@ function playSnd(buf){
   source.copyToChannel(buf,0,0);
   var oup = audio_context.createBufferSource();
   oup.buffer = source;
-  oup.connect(audio_context.destination);
+  oup.connect(gainNode);
   oup.start(0);
 }
 
+function setVolume(v){
+	gainNode.gain.value = v
+}
+
+function getVolume(v){
+	return gainNode.gain.value
+}
+
 function initAudio(){
-	if(!audio_context) audio_context = new AudioContext();
+	if(audio_context!=undefined) return
+	audio_context = new AudioContext();
+	gainNode = audio_context.createGain()
+	gainNode.gain.value = 0.1 // 10 %
+	gainNode.connect(audio_context.destination)
 } 
 
 function saveArray(data, name, type) {

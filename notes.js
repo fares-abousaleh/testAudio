@@ -9,4 +9,8 @@ let someNotes =[
   "  5c,2u, ,,3c,  1:2cf:1,,,   5c,2u, ,,3d,  1:2c.:1,,1:2-wg+:1   5c,2u, ,,3c,  1:2cf:1,,,   5c,2u, ,,3d,  1:2c.:1,,1:2-wg+:1 ",
   
   " +/c 2c3e1g:2eg:1  2c3e1g:2eg:1 /f 2c3e1g:2eg:1 2c3e1g:2eg:1 -/F 2c3e1g:2ec-af:1 /a cege :21c-bAaGg :1 egc...",
+  
+  "+c..3-Aag.1f..D.dc...... /A  3c..1-Aag.f..D.dc...... f...g..2a..3b...+3C.. 1D.....",
+  
+  " 2ceg:2aA  /f  3c2e :1gaA  /g   4c2eg:2aA  /c  2+ce :1gaA  1+:4cegA:1+c",
   ]
