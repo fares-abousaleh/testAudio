@@ -44,9 +44,10 @@ document.body.onload = function(){
 vol_progress.onmousedown=function(e){
 	initAudio()
 	if(e.buttons!=1)return
-	const r = vol_progress.getBoundingClientRect()
-	let x = e.pageX - r.left
-	vol_progress.value = Math.round( x * 100.0 / (r.right-r.left) ) 
+	const xx = vol_progress.getBoundingClientRect().x
+	const ww = vol_progress.getBoundingClientRect().width
+	let x = e.x - xx
+	vol_progress.value = Math.round( x * 100.0 / ww ) 
 	setVolume(0.01*vol_progress.value)
 }
 

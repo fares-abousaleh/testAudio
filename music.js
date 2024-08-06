@@ -125,15 +125,15 @@ class InsDrm{
 					  'f':[723 ,832 ,1000],
 					  'g':[903 ,422, 522 ],
 					  'a':[1710,2422,4402],
-				      'C':[2623 ,1900 ,3300],
+				      'C':[2623 ,300 ,3300],
 					  'D':[4210,5122,4402],
 					  'F':[3000,5122,6402],
 					  'G':[2723 ,1832 ,7000],
-					  'A':[9103 ,8422, 4522 ],
-					  'b':[9710,11422,2402],
-					  'u':[9710,422,202],
-					  'v':[7710,2422,102],
-					  'w':[8710,1122,402],
+					  'A':[910  ,1422, 8522 ],
+					  'b':[1710,3422,5402],
+					  'u':[310,422,2202],
+					  'v':[ 710,2422,5102],
+					  'w':[910,1122,4402],
 					  
 				  }
 	}
@@ -146,13 +146,15 @@ class InsDrm{
 		const dth0 = Math.PI*2.0/rate
 		let dth = [ frs[0]*dth0, frs[1]*dth0, frs[2]*dth0 ]
 		 
+		 
 		for(let k=0;k<this.N;k++){	 
-			th[0] += dth[0]*rnd(0.9,1.1)
-			th[1] += dth[1]*rnd(0.9,1.1)
-			th[2] += dth[2]*rnd(0.9,1.1)
-			snd[k] = Math.sin(th[0])/(1+0.009*k)
-			       - Math.sin(th[1])/(1+0.03 *k)
-				   + Math.sin(th[2])/(1+0.09*k)
+			//const rr = sat(1-k*9.0/frs[0],0.6,1)
+			th[0] += dth[0]*rnd(1-0.0001*frs[0],1+0.0001*frs[0])*sat(1-k*12.0/frs[0],0.6,1)
+			th[1] += dth[1]*rnd(1-0.0005*frs[1],1+0.0005*frs[1])*sat(1-k*12.0/frs[1],0.6,1)
+			th[2] += dth[2]*rnd(1-0.001*frs[2],1+0.001*frs[2])*sat(1-k*12.0/frs[2],0.6,1)
+			snd[k] = 10*Math.sin(th[0])/(1+0.0009*k)
+			       - 5*Math.sin(th[1])/(1+0.003 *k)
+				   + Math.sin(th[2])/(1+0.009*k)
 		}
 		normalise(snd)
 		//console.log("drm made so far:",this.hist)
@@ -192,12 +194,12 @@ class InsSqr {
 		
 		const res  = new Filter() 
 		let frm1 = this.frm1
-		 while(frm1< 2*fr)frm1*=1.12
+		 while(frm1< 2*fr)frm1*=1.5
 		res.designRes( frm1, 0.1 * frm1 ) 
 		
 		const hi  = new Filter()
 		let frm2 = this.frm2
-		 while(frm2< 4*fr)frm2*=1.12
+		 while(frm2< 4*fr)frm2*=1.5
 		hi.designRes( frm2, 0.15* frm2  )
 		console.log("frm1=",frm1,"   frm2=",frm2)
 		 

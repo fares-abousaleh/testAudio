@@ -11,9 +11,14 @@ var gainNode = undefined
 function stopSnd()
 {
 	if(audio_context == undefined) return;
-	audio_context.suspend();
-	audio_context.close();
-	audio_context=undefined;	
+	audio_context.suspend()
+	gainNode.disconnect()
+	let vol = gainNode.gain.value
+	delete gainNode
+	gainNode = audio_context.createGain()
+	gainNode.gain.value = vol
+	gainNode.connect(audio_context.destination)
+	audio_context.resume()
 }
 
 function playSnd(buf){

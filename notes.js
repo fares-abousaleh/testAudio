@@ -12,5 +12,13 @@ let someNotes =[
   
   "+c..3-Aag.1f..D.dc...... /A  3c..1-Aag.f..D.dc...... f...g..2a..3b...+3C.. 1D.....",
   
+  "3c1u,u 3c,1uf 3g1c1f:2cf:1 3u:41ufuf:11u, 2c.:41cc-w+c:1 c,c:2gf:1    3c1u,u 3g,1vA 3g1f1g:2vA:1 3g:41fgfg:11f, 2g.:41cc-w+c:1 c,c,  ",
+  
   " 2ceg:2aA  /f  3c2e :1gaA  /g   4c2eg:2aA  /c  2+ce :1gaA  1+:4cegA:1+c",
   ]
+  
+let somePercussions = [
+   "5c..1F 5e..e..e..e.1F 5c..1F 5e..e..e..e.1F 5c..1F 5e..e..e..e.1F ",
+   "5c7e6Ae  9c4:2GF:19A1A  5c7e.e  9c4:2GF:19A1A  5c7e.e  9c4:2GF:19A1A  ",
+   "5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  ",
+]  

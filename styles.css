@@ -22,7 +22,7 @@ progress::-webkit-progress-bar {
         }
 
 progress::-webkit-progress-value {
-   -webkit-appearance: none;
+   
    background: #600000;
   color:#200000; 
   
