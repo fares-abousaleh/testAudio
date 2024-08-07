@@ -1,10 +1,10 @@
 *{
-   
+  user-select:none; 
   background: #2F0000;
   color:#ff7121; 
   padding-left: 4px;
   margin:1px;
-  text-decoration: none;
+  
   font-size:1.1rem;
   font-family:"Courier";
 }
@@ -86,7 +86,7 @@ hr{
 
 .INPUT:hover,.BTN:hover  {
   color:#ff5f31; 
-border: 1px solid #af0000;  
+  border: 1px solid #af0000;  
 }
 
 .INPUT:active,.INPUT:focus,.BTN:active,.BTN:focus{
@@ -94,4 +94,12 @@ border: 1px solid #af0000;
   outline:none;
   border: 1px solid #ff0000;
    
+}
+
+.CANVAS{
+	 
+	background:#100000;
+	border: 1px solid #a10000;
+	border-radius:8px;
+	 
 }

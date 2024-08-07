@@ -117,7 +117,7 @@ class InsDrm{
 
     constructor(){
 	   this.hist = {}
-	   this.N = Math.round(0.1*rate)
+	   this.N = Math.round(0.4*rate)
 	   this.frs = {
 		              'c':[623 ,900 ,1300],
 					  'd':[3000,4122,2402],
@@ -129,9 +129,9 @@ class InsDrm{
 					  'D':[4210,5122,4402],
 					  'F':[3000,5122,6402],
 					  'G':[2723 ,1832 ,7000],
-					  'A':[910  ,1422, 8522 ],
+					  'A':[3910  ,4422, 8522 ],
 					  'b':[1710,3422,5402],
-					  'u':[310,422,2202],
+					  'u':[910,1422,11202],
 					  'v':[ 710,2422,5102],
 					  'w':[910,1122,4402],
 					  
@@ -175,14 +175,16 @@ function freq(nt,oct){
 }
 
 class InsSqr {
-   
-   constructor(frm1=13,frm2=15){
+    
+   constructor(frm1=925,frm2=2119){
 		this.frm1 = frm1
 		this.frm2 = frm2
-   }	   
+   }	 
+   
    waveform(t,perd){ 
 	   return t% perd - perd/2
-   }		
+   }	
+   
    get(nt,oct,L){    
 	   let fr = freq(nt,oct)
 	    const n = Math.ceil( L*rate)
@@ -198,8 +200,8 @@ class InsSqr {
 		res.designRes( frm1, 0.1 * frm1 ) 
 		
 		const hi  = new Filter()
-		let frm2 = this.frm2
-		 while(frm2< 4*fr)frm2*=1.5
+		let frm2 = frm1*this.frm2*1.0/this.frm1
+		  
 		hi.designRes( frm2, 0.15* frm2  )
 		console.log("frm1=",frm1,"   frm2=",frm2)
 		 
@@ -227,7 +229,7 @@ class InsSqr {
 
 class InsStr {
 	
-	constructor(a=400.0,b=900.0,lopg=0.23,g=0.999,L=0.85){ 
+	constructor(a=400.0,b=900.0,lopg=0.23,g=0.999,L=1.0){ 
 		this.frm1 = a
 		this.frm2 = b
 		this.lopg = lopg
@@ -294,13 +296,3 @@ class InsStr {
 	
 }
 
-function normalise(v,vol=1.0){
-	let mx = 0
-	for(let k=0;k<v.length;k++)
-		mx = Math.max(mx,Math.abs(v[k]))
-	if(mx==0)return
-	
-	mx=vol/mx
-	for(let k=0;k<v.length;k++)
-		v[k]*=mx
-}

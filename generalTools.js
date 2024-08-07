@@ -48,6 +48,10 @@ function rndDecide(p){
 	return (rnd(0,1)<=p)
 }
 
+function rndElement(arr){
+	return arr[rndInt(0,arr.length)]
+}
+
 function sat(v,a,b){
 	if(v<=a)return a
 	if(v>=b)return b

@@ -29,10 +29,15 @@
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd1);" />
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
 			<input class="BTN" type="button" value="export" onclick="saveWave('snd1.wav',snd1,rate);" />
-			<input class="BTN" type="button" value="random song" onclick="inp1.value=someNotes[rndInt(0,someNotes.length)];" />
+			<input class="BTN" type="button" value="random song" onclick="inp1.value=rndElement(someNotes);" />
 		</td>  
 	</tr>
-	
+	<tr>
+	<td></td>
+	 <td id="keyboard_1">
+	 
+	 </td>
+	</tr>
 </table>
 
 <br><hr><br>
@@ -50,10 +55,15 @@
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd2);"/>
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
 			<input class="BTN" type="button" value="export" onclick="saveWave('snd2.wav',snd2,rate);" />
-			<input class="BTN" type="button" value="random song" onclick="inp2.value=someNotes[rndInt(0,someNotes.length)];" />
+			<input class="BTN" type="button" value="random song" onclick="inp2.value=rndElement(someNotes);" />
 		</td>  
 	</tr>
-	
+	<tr>
+	<td></td>
+	 <td id="keyboard_2">
+	 
+	 </td>
+	</tr>
 	
 </table>
 <br><hr><br>
@@ -73,10 +83,15 @@
 			<input class="BTN" type="button" value="replay" onclick="playSnd(snd3);"/>
 			<input class="BTN" type="button" value="stop" onclick="stopSnd();" />
 			<input class="BTN" type="button" value="export" onclick="saveWave('snd3.wav',snd3,rate);" />
-			<input class="BTN" type="button" value="random drumline" onclick="inp3.value=somePercussions[rndInt(0,somePercussions.length)];" />
+			<input class="BTN" type="button" value="random drumline" onclick="inp3.value=rndElement(somePercussions);" />
 		</td>  
 	</tr>
-	
+	<tr>
+	<td></td>
+	 <td id="keyboard_3">
+	 
+	 </td>
+	</tr>
 	
 </table>
 <br><hr><br>
@@ -91,7 +106,7 @@ time unit: <input class="INPUT" style="width:6rem;height:2rem;" type="text" valu
 volume: 
 </td>
 <td style="align:left;">
-<progress class="BTN" width="500px" id="vol_progress" min="0" value="33" max="100" >volume</progress>
+<progress class="BTN" width="500px" id="vol_progress" min="0" value="75" max="100" >volume</progress>
 </td>
 </tr>
 </table>
@@ -100,6 +115,7 @@ volume:
 </body>
 <script src="./generalTools.js"></script>
 <script src="./audio.js"></script>
+<script src="./filters.js"></script>
 <script src="./music.js"></script>
 <script src="./notes.js"></script>
 <script src="./main.js"></script>
