@@ -111,5 +111,8 @@ can.onmousedown=function(e){
 	playSnd( ins.get(scl[x%scl.length],oct,0.61) )
 	//playSnd( ins.get(rndElement(['c','C','d']),4,0.61) )
 }
-
+window.onresize=function(){
+	can.width = Math.round(0.8*window.innerWidth)
+	drawCan()
+}
 vol_progress.onmousemove = vol_progress.onmousedown

@@ -21,5 +21,7 @@ let somePercussions = [
    "5c..1F 5e..e..e..e.1F 5c..1F 5e..e..e..e.1F 5c..1F 5e..e..e..e.1F ",
    "5c7e6Ae  9c4:2GF:19A1A  5c7e.e  9c4:2GF:19A1A  5c7e.e  9c4:2GF:19A1A  ",
    "6c4eue 3cue:4uuuu:1   6c4eue 3cue:4uuuu:1   6c4eue 3cue:4uuuu:1   6c4eue 3cue:4uuuu:1   ",
+   "9c1A9C2F1F7c1A1F  9c1A9C2F1F7c1A F 9c1A9C2FF7c1A F  ",
+   " D.d eDb eb   Dbd eD. e.  D.d eDF eA DAd eD. e.  D.d eDb eb   Dbd eD. e:2CC:1  DCd eDA eF DAd eD. e. ",  
    "5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  ",
 ]  
