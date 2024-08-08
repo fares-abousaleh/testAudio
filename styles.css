@@ -38,7 +38,7 @@ progress::-webkit-progress-value {
   margin:1px;
   text-decoration: none;
   cursor: text;
-  width:70rem; 
+  width:60rem; 
   height:40px;
   font-size:1.2rem;
   border-radius:8px;
@@ -99,7 +99,7 @@ hr{
 .CANVAS{
 	 
 	background:#100000;
-	border: 1px solid #a10000;
-	border-radius:8px;
+	 
+	 
 	 
 }

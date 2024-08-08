@@ -1,7 +1,11 @@
  /*----------------------------
      author: Fares-Abousaleh  
    -----------------------------*/
-const scl = ['c','C','d','D','e','f','F','g','G','a','A','b']
+const scl    =  ['c','C','d','D','e','f','F','g','G','a','A','b']
+
+const sclclr =  [1,0,1,0,1,1,0,1,0,1,0,1]
+
+const sclN = 30
 
 const snd1 = new Float32Array(13*rate)
 
@@ -9,7 +13,7 @@ const snd2 = new Float32Array(13*rate)
 
 const snd3 = new Float32Array(13*rate)
 
-const ins1 = new InsSqr(925, 2119 )
+const ins1 = new InsSqr(725, 2319 )
 
 const ins2 = new InsStr(1330, 513.1,0.26,0.99999  )
 
@@ -27,10 +31,10 @@ function run(snd,ins,inp){
 	let res = makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins)
 	if(!res)alert("errors in notes")
 	if(ins==ins1){
-		addEcho(snd,0.27   , 0.1     )
-		addEcho(snd,0.271  , -0.11  )
-		addEcho(snd,0.2371 , -0.12  )
-		addEcho(snd,0.23   , 0.1    )
+		addEcho(snd,0.517   , 0.042     )
+		addEcho(snd,0.3371  , -0.081  )
+		addEcho(snd,0.35371 , -0.099   )
+		addEcho(snd,0.293   , 0.12    )
 	}
 	normalise(snd,0.24)
 	playSnd(snd)
@@ -41,6 +45,7 @@ document.body.onload = function(){
 	inp2.value =  inp1.value
 	inp3.value = "3f1F4g1G2a1g1db 3f1F4g1G2a1g1db  3f1F4g1G2a1g1db  3f1F4g1G2a1g1db    "
 	tunit_inp.value = "0.18"
+	window.onresize()
 }
 
 vol_progress.onmousedown=function(e){
@@ -85,34 +90,54 @@ inp3.onfocus = function(){
 
 
 function drawCan(){
-	const clr = ["#500000","#200000","#e00"]
+	const clr = ["#200","#400"]
 	let x = 0
-	const N = 32
+	const N = sclN
 	const dx = can.width *1.0 / N
 	ctx.font=""+Math.floor(dx/2)+"pt   Calibri"
+	ctx.strokeStyle="#e00"
+	ctx.lineWidth=1
+	
 	for(let k=0;k<N;k++){
-		ctx.fillStyle=clr[k%2]
+		ctx.fillStyle=clr[sclclr[k%scl.length]]
 		ctx.fillRect(x,0,dx,can.height)
-		ctx.strokeStyle=clr[2]
-		ctx.lineWidth=1
+		ctx.strokeRect(x,0,dx,can.height)
 		ctx.strokeText(scl[k%scl.length],x+dx/4,can.height*0.8 )
 		x+=dx
+	}
+	ctx.strokeStyle="#e20"
+	const uvw=[3,8,10]
+	const s =['u','v','w']
+	for(let k=0;k<N;k++){
+		let x = (uvw[k%3]+Math.floor(k/3)*12)*dx
+		if(x>can.width)break
+		//ctx.strokeRect(x,0,dx,can.height)
+		ctx.strokeText(s[k%3],x+dx/4,can.height*0.31 )
 	}
 }
 
 can.onmousedown=function(e){
-	const N = 32
+	initAudio()
+	const N = sclN
 	const dx = can.getBoundingClientRect().width * 1.0 / N
 	let x = e.x - can.getBoundingClientRect().x
-	console.log(x)
+	let y = e.y - can.getBoundingClientRect().y
+	
 	x = Math.floor( x *1.0/ dx )
 	console.log(x)
 	let oct = Math.floor(x /scl.length )+4
-	playSnd( ins.get(scl[x%scl.length],oct,0.61) )
+	let nt = scl[x%scl.length]
+	let i = 'DGA'.search(nt)
+	if(i>=0&&y<can.getBoundingClientRect().height/2){
+		nt='uvw'[i]
+	}
+	let d = ins.get(nt,oct,0.61) 
+	normalise(d,getVolume()*0.25)
+	playSnd(d )
 	//playSnd( ins.get(rndElement(['c','C','d']),4,0.61) )
 }
 window.onresize=function(){
-	can.width = Math.round(0.8*window.innerWidth)
+	can.width =  Math.round(0.84*window.innerWidth)
 	drawCan()
 }
 vol_progress.onmousemove = vol_progress.onmousedown

@@ -116,29 +116,29 @@ const stdkeysR  = defScale("24 c 24 C 25 d 26 D 28 u 29 e 31 f 34 F 36 g 38 G 40
 class InsDrm{
 
     constructor(){
-	   this.hist = {}
+	    
 	   this.N = Math.round(0.4*rate)
 	   this.frs = {
 		              'c':[623 ,900 ,1300],
 					  'd':[700 ,1122,2402],
 					  'e':[1000,2122,3402],
-					  'f':[723 ,832 ,1000],
-					  'g':[903 ,422, 522 ],
+					  'f':[723 ,1832 ,1200],
+					  'g':[903 ,1262, 1522 ],
 					  'a':[1710,2422,4402],
 				      'C':[1123 , 1500 ,3300],
 					  'D':[3610,5122,9402],
-					  'F':[3000,5122,6402],
-					  'G':[3723 ,1832 ,7000],
+					  'F':[2090,4122,5402],
+					  'G':[ 723 , 832 ,1700 ],
 					  'A':[3910  ,4422, 8522 ],
 					  'b':[1710,1422,2402],
 					  'u':[910,1422,11202],
-					  'v':[ 710,2422,5102],
+					  'v':[ 710,2422,3510 ],
 					  'w':[910,1122,4402],
 					  
 				  }
 	}
 	
-	make(nt,oct,L){
+	get(nt,oct,L){
 		let frs = this.frs[nt]
 		if(frs==undefined)return []
 		let snd = new Float32Array(this.N)
@@ -146,32 +146,29 @@ class InsDrm{
 		const dth0 = Math.PI*2.0/rate
 		let dth = [ frs[0]*dth0, frs[1]*dth0, frs[2]*dth0 ]
 		 
-		const a=  Math.exp(-(400.0-frs[0])*0.001);//,1000.0/frs[1],1000.0/frs[2]] 
+		const a0=  100.0/frs[0] 
+		const a1=  100.0/frs[1]
+		const a2=  100.0/frs[2]
 		
-		let atk = 1;
-		if(frs[0]>=3000)atk=0;
+		 
 		for(let k=0;k<this.N;k++){	 
-		    if(atk<0.0161)atk+=0.00021
-			//const rr = sat(1-k*9.0/frs[0],0.6,1)
+		     
+			 
 			th[0] += dth[0]*rnd(1-0.00002*frs[0],1+0.00002*frs[0])*sat(1-k*12.0/frs[0],0.6,1)
 			th[1] += dth[1]*rnd(1-0.00019*frs[1],1+0.00019*frs[1])*sat(1-k*12.0/frs[1],0.6,1)
 			th[2] += dth[2]*rnd(1-0.001*frs[2],1+0.001*frs[2])*sat(1-k*12.0/frs[2],0.6,1)
-			snd[k] = atk*(
-            			Math.sin(th[0])/(1+0.0009*k)
-			          + Math.sin(th[1])/(1+0.002 *k)
-				      + Math.sin(th[2])/(1+frs[2]*k*0.00006)
-				   )
+			snd[k] =   
+            			a0*Math.sin(th[0])/(1+0.0009*k)
+			          + a1*Math.sin(th[1])/(1+0.002 *k)
+				      + a2*Math.sin(th[2])/(1+0.006*k)
+				    
 		}
-		normalise(snd,a*atk)
+		normalise(snd,0.25 )
 		//console.log("drm made so far:",this.hist)
 		return snd;
 	}
 	
-	get(nt,oct,L){
-		if(!this.hist[nt+oct])
-			this.hist[nt+oct]=this.make(nt,oct,L)
-		return this.hist[nt+oct]
-	}
+	
 	
 }
 
@@ -199,16 +196,17 @@ class InsSqr {
 		let t = 0
 		const dck = new Filter()
 		dck.designDCKill( 0.95 )
-		
+		 
 		const res  = new Filter() 
-		let frm1 = this.frm1
-		 while(frm1< 2*fr)frm1*=1.5
-		res.designRes( frm1, 0.1 * frm1 ) 
+		 let frm1 = Math.ceil(this.frm1/(fr))*fr
+		//let frm1 = this.frm1 
+		//res.designRes( frm1, 0.1 * frm1 ) 
 		
 		const hi  = new Filter()
-		let frm2 = frm1*this.frm2*1.0/this.frm1
-		  
-		hi.designRes( frm2, 0.15* frm2  )
+		 let frm2 = Math.ceil(this.frm2/(fr))*fr
+		//let frm2 = this.frm2  
+		
+		//hi.designRes( frm2, 0.1 * frm2  )
 		console.log("frm1=",frm1,"   frm2=",frm2)
 		 
 		let rr =0
@@ -217,15 +215,16 @@ class InsSqr {
 			
 			let A = Math.sin(k*Math.PI/n)
 			 
-			let v =  this.waveform(t,perd*(1+0.0004*Math.sin(t*30.0/rate))) 
+			let v =   this.waveform(t,perd*(1+0.00004*Math.sin(t*30.0/rate))) 
 			v = dck.tic( v )
 			
-			rr+=rnd(0.1,0.9)*0.001
-			r += 0.0001*(rr-r)
-			if(rr>0.1)rr=0
-			res.designRes( frm1*(1+r), 0.15* frm1  )			
-			hi.designRes( frm2*(1+r*2), 0.15* frm2  )			
-			snd[k] = A*( res.tic( v ) +   hi.tic( v) )
+			r  = 0.1*Math.sin(k*2*8.0*Math.PI/rate)
+			rr = 0.3*Math.sin(k*2*14.1*Math.PI/rate)
+			if(rr>0.6)rr=0.5
+			res.designRes( frm1, 0.016* frm1*(1+r)  )			
+			hi.designRes( frm2 , 0.05* frm2*(1+rr)  )			
+			 
+			snd[k] = A *  (  res.tic( v ) +  0.3* hi.tic( v )) 
 		}
 		normalise(snd)
 		return snd
