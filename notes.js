@@ -19,6 +19,8 @@ let someNotes =[
   " 2ceg:2aA  /f  3c2e :1gaA  /g   4c2eg:2aA  /c  2+ce :1gaA  1+:4cegA:1+c",
   
   "   2c 3u,1D.,c.d..c ,c.2c.3u.1D...u.,c,.2.f.:2gb v.1A gbvgb:3bvgb:2vg:1..f..g...",
+  
+  "c......d....DDg..............F....+c-Aacf............e........4bg-b+DF.....gF. ..2g:2Ag:1..+1g.A.g..",
   ]
   
 let somePercussions = [
@@ -27,5 +29,6 @@ let somePercussions = [
    "6c4eue 3cue:4uuuu:1   6c4eue 3cue:4uuuu:1   6c4eue 3cue:4uuuu:1   6c4eue 3cue:4uuuu:1   ",
    "9c1A9C2F1F7c1A1F  9c1A9C2F1F7c1A F 9c1A9C2FF7c1A F  ",
    " D.d eDb eb   Dbd eD. e.  D.d eDF eA DAd eD. e.  D.d eDb eb   Dbd eD. e:2CC:1  DCd eDA eF DAd eD. e. ",  
+   "9c3C1d9C1b1b 9c.1d1duD     9c3C1d9C1b1b 9c.1d1duD     9c3C1d9C1b1b 9c.1d1duD     9c3C1d9C1b1b 9c.1d1duD     ",
    "5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  5c7e.e  9c4G3.1A  ",
 ]  

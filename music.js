@@ -52,7 +52,7 @@ function defScaleR(s){
     <ins> is the instrument object to be used.	
   ----------------------------------------*/	
 
-function makeMusic(dest,s,dt=1,ins){
+function makeMusic(dest,s,dt=1,ins,strt=0){
 	let oct = 4
 	let oc  = 4
 	let tm  = 0
@@ -97,7 +97,8 @@ function makeMusic(dest,s,dt=1,ins){
 			if(stdkeys[s[k]])
 				nt = s[k]
 			else nt=','
-			tm = dtn		
+			if(k>=strt)tm = dtn		
+			else tm=0
 			vl = vol 
 			oc = oct
 			Transp = tr
@@ -198,12 +199,12 @@ class InsSqr {
 		dck.designDCKill( 0.95 )
 		 
 		const res  = new Filter() 
-		 let frm1 = Math.ceil(this.frm1/(fr))*fr
+		  let frm1 = Math.ceil(this.frm1/(fr))*fr
 		//let frm1 = this.frm1 
 		//res.designRes( frm1, 0.1 * frm1 ) 
 		
 		const hi  = new Filter()
-		 let frm2 = Math.ceil(this.frm2/(fr))*fr
+		  let frm2 = Math.ceil(this.frm2/(fr))*fr
 		//let frm2 = this.frm2  
 		
 		//hi.designRes( frm2, 0.1 * frm2  )
@@ -211,6 +212,8 @@ class InsSqr {
 		 
 		let rr =0
 		let r  =0
+		let filt = new Filter()
+		 
 		for(let k=0;k<n;k++,t+=1){
 			
 			let A = Math.sin(k*Math.PI/n)
@@ -218,13 +221,13 @@ class InsSqr {
 			let v =   this.waveform(t,perd*(1+0.00004*Math.sin(t*30.0/rate))) 
 			v = dck.tic( v )
 			
-			r  = 0.1*Math.sin(k*2*8.0*Math.PI/rate)
-			rr = 0.3*Math.sin(k*2*14.1*Math.PI/rate)
-			if(rr>0.6)rr=0.5
-			res.designRes( frm1, 0.016* frm1*(1+r)  )			
-			hi.designRes( frm2 , 0.05* frm2*(1+rr)  )			
+			r  = 0.07*Math.sin(k*2*10.0*Math.PI/rate)
+			rr = 0.09*Math.sin(k*2*13.1*Math.PI/rate)
 			 
-			snd[k] = A *  (  res.tic( v ) +  0.3* hi.tic( v )) 
+			res.designRes( frm1, 0.1* frm1 *(1+r) )			
+			hi.designRes( frm2 , 0.1* frm2*(1+rr)  )			
+			 
+			snd[k] = A *  (    res.tic( v ) +   hi.tic( v )) 
 		}
 		normalise(snd)
 		return snd
@@ -301,3 +304,40 @@ class InsStr {
 	
 }
 
+
+class InsWind{
+	
+	constructor(cf){
+		this.cf = cf
+	}
+	
+	f(x){
+		
+		return Math.tanh(this.cf[0]*x)
+	}
+	
+	get(nt,oct,tm){
+		const fr = freq(nt,oct)
+		const perd =  rate*1.0/fr
+		const dth = fr*2*Math.PI/rate
+		let   th = 0 
+		const n = Math.ceil(tm*rate)
+		const snd = new Float32Array(n)
+		let   t = 0 
+		const dt = 2*Math.PI/rate
+		const fl = new Filter()
+		const cf  = 300.0/fr
+		fl.designDCKill(0.95)
+		for(let k=0;k<n;k++){
+			let A = Math.tanh((4+Math.sin(6*t))*Math.sin(k*Math.PI/n))
+			t+=dt
+			let v = A * Math.sin(th)
+			 th+=dth*(1+  (1.953-k*0.6/n)* getV(snd,k - perd*1.3+perd*k*1.0/n ))
+			//th+=dth*Math.sin(t *151)
+			snd[k] =   fl.tic(this.f(cf* v))
+		}
+		
+		normalise(snd,cf)
+		return snd
+	}
+}

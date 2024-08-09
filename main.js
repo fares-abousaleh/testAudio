@@ -7,13 +7,17 @@ const sclclr =  [1,0,1,0,1,1,0,1,0,1,0,1]
 
 const sclN = 30
 
-const snd1 = new Float32Array(13*rate)
+const Length = 25 //seconds
 
-const snd2 = new Float32Array(13*rate)
+const snd1 = new Float32Array(Length*rate)
 
-const snd3 = new Float32Array(13*rate)
+const snd2 = new Float32Array(Length*rate)
 
-const ins1 = new InsSqr(725, 2319 )
+const snd3 = new Float32Array(Length*rate)
+
+//const ins1 = new InsSqr(725, 2319 )
+
+const ins1 = new InsWind([1,1.2,-1.1,-1.01] )
 
 const ins2 = new InsStr(1330, 513.1,0.26,0.99999  )
 
@@ -24,11 +28,11 @@ const ins3 = new InsDrm()
 	 to buffer <snd> using intrument <ins>
    ------------------------------------------*/
    
-function run(snd,ins,inp){
+function run(snd,ins,inp,n){
 	initAudio()
 	setVolume(0.01*vol_progress.value)
 	snd.fill(0)
-	let res = makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins)
+	let res = makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins,n)
 	if(!res)alert("errors in notes")
 	if(ins==ins1){
 		addEcho(snd,0.517   , 0.042     )
@@ -41,7 +45,7 @@ function run(snd,ins,inp){
 }
 
 document.body.onload = function(){ 
-	inp1.value = " + 3cDgc -gA+d-g 2 +cDgc 1 -gA+d-g 4 +dFad 5 -Fa+d-g 8+dFad  4-Fa+2d- g Ff1eDdCc cDgc -gA+d-g 2 +cDgc 1 -gA+d-g 4 +dFad 5 -Fa+d-g 8+dFad  4-Fa+2d- "
+	inp1.value = someNotes[someNotes.length-1]
 	inp2.value =  inp1.value
 	inp3.value = "3f1F4g1G2a1g1db 3f1F4g1G2a1g1db  3f1F4g1G2a1g1db  3f1F4g1G2a1g1db    "
 	tunit_inp.value = "0.18"
@@ -118,6 +122,7 @@ function drawCan(){
 
 can.onmousedown=function(e){
 	initAudio()
+	setVolume(vol_progress.value*0.01)
 	const N = sclN
 	const dx = can.getBoundingClientRect().width * 1.0 / N
 	let x = e.x - can.getBoundingClientRect().x
@@ -140,4 +145,13 @@ window.onresize=function(){
 	can.width =  Math.round(0.84*window.innerWidth)
 	drawCan()
 }
+
+inp1.onclick=function(e){
+	if(!e.ctrlKey)return
+	const inp = e.target
+	const n = e.target.selectionStart
+	run(snd1,ins1,inp1,n)
+	
+}
+
 vol_progress.onmousemove = vol_progress.onmousedown
