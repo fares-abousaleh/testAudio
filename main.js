@@ -17,8 +17,8 @@ const snd3 = new Float32Array(Length*rate)
 
 //const ins1 = new InsSqr(725, 2319 )
 
-const ins1 = new InsWind([1,1.2,-1.1,-1.01] )
-
+ //const ins1 = new InsWind([1,1.2,-1.1,-1.01] )
+ const ins1 = new InsVio([ 2221 ,900,1521])
 const ins2 = new InsStr(1330, 513.1,0.26,0.99999  )
 
 const ins3 = new InsDrm()
@@ -46,8 +46,8 @@ function run(snd,ins,inp,n){
 
 document.body.onload = function(){ 
 	inp1.value = someNotes[someNotes.length-1]
-	inp2.value =  inp1.value
-	inp3.value = "3f1F4g1G2a1g1db 3f1F4g1G2a1g1db  3f1F4g1G2a1g1db  3f1F4g1G2a1g1db    "
+	inp2.value =  someNotes[2]
+	inp3.value = somePercussions[2]
 	tunit_inp.value = "0.18"
 	window.onresize()
 }

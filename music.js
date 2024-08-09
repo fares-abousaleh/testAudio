@@ -341,3 +341,49 @@ class InsWind{
 		return snd
 	}
 }
+
+
+class InsVio{
+	
+	constructor(frms){
+		this.frms = frms
+	}
+	
+	get(nt,oct,L){
+		const fr = freq(nt,oct)
+		const dt = 2*Math.PI/rate
+		const perd =  rate*1.0/fr
+		const dth = fr*dt
+		let   th = 0 
+		const n = Math.ceil(L*rate)
+		const snd = new Float32Array(n)
+		let   t = 0 
+		
+		const fl = new Filter() 
+		fl.designDCKill(0.95)
+		
+		const lo = new Filter()
+		lo.designLowPass(0.9)
+		
+		const frm = Math.ceil(this.frms[0]/fr)
+		let i = 0.0
+		let v = 0
+		let acc = 0
+		
+		for(let k=0;k<n;k++){
+			let A = Math.tanh((3+Math.sin(6*t)+Math.sin(7*t))*Math.sin(k*Math.PI/n))
+			v =   Math.sin(th)
+			let aa = Math.sqrt(acc/ (k+1)) 
+			th += dth * ( 1 + 0.12*(1.0/(1+aa))*Math.tanh(lo.tic(  getV(snd,k-perd ))))
+			snd[k] = A * Math.sin(3*th+  fl.tic(v-0.7*getV(snd,k-perd*1.11)) ) 
+		    acc = 0.999 * acc + 0.001*snd[k]*snd[k]
+			t+=dt
+			 
+		}
+		
+		normalise(snd,0.2)
+		return snd
+	}
+	
+	
+}
