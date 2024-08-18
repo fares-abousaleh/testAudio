@@ -1,8 +1,0 @@
-tempo 6
-wind   3cDg. G.b. s...0
-str   1 cg.D cg.f cg.D 2
-next
-
-tempo 3
-wind  +1cDg.G.3b.s..0
-str      2cg. gDd.Dc-g.+D cg.f1
