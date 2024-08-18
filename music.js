@@ -135,7 +135,7 @@ function makeMusic(dest,s,dt=1,ins,strt=0){
 			Transp = tr
 		}
 	}
-	lastPos = Math.max(pos,lastPos )
+	lastPos = Math.max(pos,lastPos+startPos )
 	
 	if(notes.length==0)return true
 	if(vols.length==1)vols.push({vl:0.5,pos:notes[notes.length-1].pos})
