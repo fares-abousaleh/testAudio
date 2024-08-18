@@ -1,6 +1,10 @@
 //--------------------------
 // ** hide / show / togle html element
 
+function isVisible(e){
+	return e.style.display!='none'
+}
+
 function showElement(e){
   e.style.display = 'block'
 }
@@ -66,4 +70,38 @@ function intersectRects(A,B){
 			  (A.y-A.h >= B.y+B.h)||  // A / B
 	          (B.y-B.h >= A.y+A.h)   // B / A  
     return !res			  
+}
+
+
+//---- load text file as string into a textarea or any object with propriety <value>
+function loadTextAreaFromFile(tx,filetype=".txt"){
+	const btn  = document.createElement("input")
+	btn.type="file"
+	btn.accept= filetype
+    btn.onchange = function(e) {
+		var fr = new FileReader();
+		fr.onload = function(e) {
+			tx.value = e.target.result;
+		};
+       fr.readAsText( btn.files[0]);		
+	}	
+	btn.click()
+}
+
+//--- save string to file
+function saveStr(str,filename) {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    var file = new Blob([str], {type: "text/plain"});
+    a.href = URL.createObjectURL(file);
+    a.download = filename;
+    a.click();
+}
+
+//--- find first word in a string
+function chopHead(s){
+	let i=0
+	s=s.trim()
+	while(i<s.length&&s[i]!=' '&&s[i]!='\t')i++
+	return s.substr(0,i).trim() 
 }

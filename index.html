@@ -109,6 +109,27 @@ volume:
 <progress class="BTN" width="500px" id="vol_progress" min="0" value="75" max="100" >volume</progress>
 </td>
 </tr>
+<tr>
+<td>scale:</td>
+<td>
+<input type="text" class ="INPUT" id="inp_scl" onchange="stdkeys=defSteps(inp_scl.value);"></input>
+</td>
+</tr>
+ 
+<tr>
+<td>
+</td>
+<td>
+<input type="button" class="BTN" value="random" onclick="inp_scl.value=rndElement(someScales);stdkeys=defSteps(inp_scl.value);"></input>
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<input type="button" value="mix" class="BTN" onclick="btnMix();" >
+<input type="button" value="export" class="BTN" onclick="saveWave('sndM.wav',sndMix,rate);" >
+</td>
+</tr>
 </table>
 
 

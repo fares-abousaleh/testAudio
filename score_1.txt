@@ -1,0 +1,5 @@
+
+tempo 5
+
+wind  ++3c............-1b+3c..2C3c...-gF.....A+C-A..F...1feF..+c-c..
+str   1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b 4FACFF3ACFFAC2FFACFF1ACFFACFFACF1c2D2g1b1c2D2g1b
