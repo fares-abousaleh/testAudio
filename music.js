@@ -16,6 +16,7 @@ function resetPos(){
 }
 
 function advancePos(){
+	console.log('advance',startPos,' ' ,lastPos)
 	startPos = lastPos
 }
 
@@ -135,13 +136,15 @@ function makeMusic(dest,s,dt=1,ins,strt=0){
 			Transp = tr
 		}
 	}
-	lastPos = Math.max(pos,lastPos+startPos )
+	lastPos = Math.max(pos+startPos,lastPos )
 	
 	if(notes.length==0)return true
 	if(vols.length==1)vols.push({vl:0.5,pos:notes[notes.length-1].pos})
 	console.log(notes) 
 	
+	 
 	for(let k=0;k<notes.length;k++){
+		 
 		let nt = notes[k]
 		 
 		 
@@ -153,70 +156,15 @@ function makeMusic(dest,s,dt=1,ins,strt=0){
 		 
 		//console.log(vl)
 		mixSnd( dest,ins.get(nt.nt,nt.oc,nt.tm),nt.pos+startPos,vl  )
-	}
-	
-	return true
-}
-
-/*-------------------
-function makeMusic1(dest,s,dt=1,ins,strt=0){
-	let oct = 4
-	let oc  = 4
-	let tm  = 0
-	let dtn  = dt
-	let nt  = ','
-	let pos = 0
-	let vol = 0.5
-	let vl  = 0.5
-	let tr = 1.0
-	Transp = 1.0
-	s+="S"
-	let k=-1 
-	while(k<s.length-1){
-		k++
-		if(s[k]==' ')continue
-		else
-		if(s[k]=='+')oct++
-		else 
-		if(s[k]=='-')oct--
-		else
-		if(s[k]=='.')  tm+=dtn 
-		else
-		if(s[k]=='/'){
-			k++
-			tr = stdkeys[s[k]]
-			if(tr==undefined)return false	
-		}else
-		if('0123456789'.search(s[k])>=0)
-			vol=parseFloat(s[k])/10.0
-		else if(s[k]==':'){
-			k++
-			if('0123456789'.search(s[k])>=0)
-			dtn = dt/parseInt(s[k])
-			else return false 
-		}
-		else{
-			if(tm!=0){
-				if(nt!=',')
-					mixSnd( dest,ins.get(nt,oc,tm),pos,vl  )
-				pos+=tm
-			}
-			if(stdkeys[s[k]])
-				nt = s[k]
-			else nt=','
-			if(k>=strt)tm = dtn		
-			else tm=0
-			vl = vol 
-			oc = oct
-			Transp = tr
-		}
+		
 	}
 	return true
 }
--------------------*/
 
 const stdStepsStr = "6 c 0.5 C 0.5 d 0.5 D 0.25 u 0.25 e 0.5 f 0.5 F 0.5 g 0.5 G 0.5 v 0.25 a 0.5 A 0.25 w 0.25 b 0.5"
+
 const stdkeysStr = "6 s 6 m -6 c 0 C 0.5 d 1 D 1.5 u 1.75 e 2 f 2.5 F 3 g 3.5 G 4 v 4.25 a 4.5 A 5 w 5.25 b 5.5"
+
 var stdkeys = defScale(stdkeysStr)
 	
 const stdkeysR  = defScale("24 c 24 C 25 d 26 D 28 u 29 e 31 f 34 F 36 g 38 G 40 v 42 a 43 A 45 w 46 b 47")
@@ -246,9 +194,19 @@ class InsDrm{
 					  'w':[910,1122,4402],
 					  
 				  }
+				  
+		this.hist ={}
 	}
 	
-	get(nt,oct,L){
+	get(nt,oct,len){
+		if(this.hist[""+nt+oct]==undefined)
+			this.hist[""+nt+oct]=this.make(nt,oct,len)
+		
+		return this.hist[""+nt+oct]
+	}
+	
+	
+	make(nt,oct,L){
 		let frs = this.frs[nt]
 		if(frs==undefined)return []
 		let snd = new Float32Array(this.N)
@@ -274,7 +232,7 @@ class InsDrm{
 				    
 		}
 		normalise(snd,0.25 )
-		//console.log("drm made so far:",this.hist)
+		console.log("drm made ",""+nt+oct)
 		return snd;
 	}
 	
@@ -354,13 +312,17 @@ class InsStr {
 		this.lopg = lopg
 		this.g    = g
 		this.N = Math.round(L*rate)
-		this.imp = new Float32Array(this.N)
-		for(let i=0;i<this.N;i++)
-			this.imp[i] = rnd()/(i*0.001+1)
+		this.hist=[]
 	}
 	
-	
 	get(nt,oct,len){
+		if(this.hist[""+nt+oct]==undefined)
+			this.hist[""+nt+oct]=this.make(nt,oct,len)
+		
+		return this.hist[""+nt+oct]
+	}
+	
+	make(nt,oct,len){
 		 
 		let snd = new Float32Array( this.N)
 		let fr =  freq(nt,oct) 
@@ -377,14 +339,14 @@ class InsStr {
 		  
 		 const res1 = new Filter()
 		 const res2 = new Filter()
-		 res1.designRes(this.frm1,  1.42* this.frm1)
-		 res2.designRes(this.frm2, 2.5* this.frm2)
+		 res1.designRes(this.frm1 ,    this.frm1 )
+		 res2.designRes(this.frm2 ,    this.frm2 )
 		 const res = new Filter()
 		 res.designRes(fr  ,  fr)
 		 let g  = Math.pow(0.1,perd*1.0/snd.length)
 		const lo = new Filter()
-		lo.designLowPass(0.9*sat(600.0/fr,0.3,0.9))
-		const r = rnd(0,this.imp.length/3)
+		lo.designLowPass(0.7*sat(600.0/fr,0.3,0.9))
+		 
 		let dec1 = 1, dec2 = 1
 		let atk = 0 
 		let A = 1,a=9
@@ -395,25 +357,41 @@ class InsStr {
 		let thh = 0
 		let v = 0 
 		let kk =0 
+		// const al = new Filter()
+		// al.designAllPass(20)
 		for(let k=0;k<snd.length;k++){
-			  if(k<perd/2)v = rnd(0.6,1);
+			  if(k<perd/4)v = rnd(0.6,1)
+				 else
+			  if(k<perd)v = -rnd(0.6,1)
 				     else v = 0
 			  v = dck.tic(v)
 			  v = lo.tic(v)
+			  // v +=  0.2*res1.tic(v) 
+			  // v -=  0.3*res2.tic(v) 
+			  // v  = al.tic(v)
+			   
 			  v += this.g * lowp.tic ( getV(snd,k-perd) )
+			   
 			  snd[k] = v
-			  mx = Math.max(Math.abs(v),mx)
+			  
 		}
-		snd = snd.subarray(1000)
+		snd = snd.subarray(Math.round(2*perd))
 		for(let k=0;k<200;k++)
 			snd[k]*=k*0.005
-		addEcho( snd, 1.5   /fr, -0.261 )
-		addEcho( snd, 1.3333/fr, -0.376 )
+		const off = Math.round(0.8*snd.length)
+		for(let k=off;k<snd.length;k++)
+			snd[k]*=(snd.length-k)*1.0/(snd.length-off)
+		//addEcho( snd, 1.5   /fr, -0.261 )
+		//addEcho( snd, 1.3333/fr, -0.376 )
+		// addPhasing(snd,13,0.15)
+		// addPhasing(snd,15,0.05)
+		// res1.tics(snd)
+		// res2.tics(snd)
 		normalise( snd, 0.3 )
+		console.log("str make :",""+nt+oct)
 		
 		
-		
-		//console.log("str made so far:",this.hist)
+		 
 	return snd 
 	}
 	
@@ -459,6 +437,7 @@ class InsWind{
 		}
 		
 		normalise(snd,cf)
+		
 		return snd
 	}
 }

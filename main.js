@@ -1,169 +1,78 @@
- /*----------------------------
-     author: Fares-Abousaleh  
-   -----------------------------*/
-const scl    =  [
-		 [ 'c','d','u','f','g','a','w' ],
-		 [ 'C','D',' ','F','G','A',' ' ],
-         [ 'c','d','e','f','g','a','b' ],
-		 [ 'd','D','f','g','v','A','b' ],
-		 ]
+
+const snd = new Float32Array(53*rate)
 
 
-const sclN = 30
 
-const Length = 25 //seconds
+const Ins = {
+     'wind': new InsWind([2221 ,900,1521]),
+     'str' : new InsStr(765,  2321,0.221,0.9947,2.1 ),
+	 'bass': new InsStr(454,  905,0.5 ,0.994 ,1.5),
+	 'perc': new InsDrm(),
+}
 
-const snd1 = new Float32Array(Length*rate)
 
-const snd2 = new Float32Array(Length*rate)
+function logMessage(s){
+	tx_log.value+= "\n"+s
+}
 
-const snd3 = new Float32Array(Length*rate)
-
-const sndMix = new Float32Array(Length*rate)
-
-const ins1 = new InsWind([2221 ,900,1521])
-
-const ins2 = new  InsStr(1030,  2513.1,0.31,0.99992  )
-
-const ins3 = new InsDrm()
-//const ins3 = new InsBass()
-
- /*------------------------------------------
-     compile notes in input <inp>
-	 to buffer <snd> using intrument <ins>
-   ------------------------------------------*/
-   
-function run(snd,ins,inp,n){
-	initAudio()
-	setVolume(0.01*vol_progress.value)
+function runMusic(){
+	
+	resetPos()
+	let lines = tx_notes.value.trim().split(/\n+/)
+	var ins 
 	snd.fill(0)
-	let res = makeMusic(snd,inp.value,parseFloat(tunit_inp.value) ,ins,n)
-	if(!res)alert("errors in notes")
-	if(ins==ins1){
-		addEcho(snd, 0.517   , +0.042  )
-		addEcho(snd, 0.3371  , -0.081  )
-		addEcho(snd, 0.35371 , -0.099  )
-		addEcho(snd, 0.293   , +0.12   )
+	
+	for(let i=0;i<lines.length;i++){
+		 
+		let curline = lines[i].trim()
+		let ind = curline.indexOf('//')
+		if(ind>=0)curline = curline.substr(0,ind)
+    
+		let head = chopHead(curline)
+		let tail = curline.substr(head.length).trim()
+		
+		if(head=='')continue
+		if(head=='next'){
+			advancePos()
+			continue
+		}
+		if(head=='tempo'){
+			let tempo = parseFloat(tail)
+			if(tempo==undefined|tempo<=0){
+				alert('wrong tempo') 
+				return false
+			}
+			tunit = 1.0 / tempo  
+			continue
+		}
+		 
+		ins = Ins[head]
+		if(ins==undefined) {
+			alert('error at line '+i)
+			return
+		}
+		makeMusic(snd,tail,tunit,ins)
 	}
-	normalise(snd,0.24)
+	addEcho(snd, rate/31  , +0.142  )
+		addEcho(snd, rate/21  , -0.181  )
+		addEcho(snd, rate/121 , -0.2199  )
+		addEcho(snd, rate/34   , +0.112   )
+	normalise(snd,0.95)
 	playSnd(snd)
 }
 
-
-
-vol_progress.onmousedown=function(e){
-	initAudio()
-	if(e.buttons!=1)return
-	const xx = vol_progress.getBoundingClientRect().x
-	const ww = vol_progress.getBoundingClientRect().width
-	let x = e.x - xx
-	vol_progress.value = Math.round( x * 100.0 / ww ) 
-	setVolume(0.01*vol_progress.value)
-}
-
-let can = document.createElement('canvas')
-can.setAttribute("class","CANVAS")
-can.width= window.innerWidth*0.8
-can.height=100
-let ctx = can.getContext('2d')
-
-let ins = ins1
-
-
-inp1.onfocus = function(){
-	keyboard_1.appendChild(can)
-	ins=ins1
-	drawCan()
-}
-
-inp1.onfocus()
-
-inp2.onfocus = function(){
-	keyboard_2.appendChild(can)
-	ins=ins2
-	drawCan()
-}
-
-inp3.onfocus = function(){
-	keyboard_3.appendChild(can)
-	ins=ins3
-	drawCan()
-}
-
-
-
-function drawCan(){
-	const clr = ["#100","#400", ]
+function loadScore(){
 	 
-	const N = sclN
-	const dx = can.width *1.0 / N
-	const dy = can.height *1.0/4
-	ctx.font=""+Math.floor(dx/2)+"pt   Calibri"
-	ctx.strokeStyle="#e00"
-	ctx.lineWidth=1
+	loadTextAreaFromFile( tx_notes )
+}
+
+function saveScore(){
+	saveStr(tx_notes.value,'score.txt')
+}
 	
-	 
-	for(let i=0;i<scl.length;i++){
-	for(let k=0;k<N;k++){
-		ctx.fillStyle=clr[(k/scl[i].length)%clr.length]
-		ctx.fillRect  (k*dx, i*dy, dx, dy)
-		ctx.strokeRect(k*dx, i*dy, dx, dy)
-		ctx.strokeText(scl[i][k%scl[i].length],k*dx+dx/4,dy*i+dy*0.8 )
-		 
-	  }
-	}
-	 
-}
-
-can.onmousedown=function(e){
-	initAudio()
-	setVolume(vol_progress.value*0.01)
-	const N = sclN
-	const dx = can.getBoundingClientRect().width * 1.0 / N
-	const dy = can.getBoundingClientRect().height * 1.0 / scl.length
-	let x = e.x - can.getBoundingClientRect().x
-	let y = e.y - can.getBoundingClientRect().y
-	
-	x = Math.floor( x *1.0/ dx )
-	y = Math.floor( y *1.0/ dy )
-	console.log(dy,y)
-	let oct = Math.floor(x /scl[y].length )+4
-	let nt = scl[y][x%scl[y].length]
-	if(nt==' ')return
-	let d = ins.get(nt,oct,0.61) 
-	normalise(d,getVolume()*0.25)
-	playSnd(d )
-	//playSnd( ins.get(rndElement(['c','C','d']),4,0.61) )
-}
-window.onresize=function(){
-	can.width =  Math.round(0.84*window.innerWidth)
-	drawCan()
-}
-
-inp1.onclick=function(e){
-	if(!e.ctrlKey)return
-	const inp = e.target
-	const n = e.target.selectionStart
-	run(snd1,ins1,inp1,n)
-	
-}
-
-vol_progress.onmousemove = vol_progress.onmousedown
-
-function btnMix(){
-	sndMix.fill(0)
-	mixSnd( sndMix, snd1,0)
-	mixSnd( sndMix, snd2,0)
-	mixSnd( sndMix, snd3,0)
-	normalise(sndMix,0.6)
-	playSnd(sndMix)
-}
-
-document.body.onload = function(){ 
-	inp1.value = someNotes[0]
-	inp2.value =  someNotes[1]
-	inp3.value = somePercussions[2]
-	inp_scl.value = stdStepsStr
-	tunit_inp.value = "0.18"
-	window.onresize()
+window.onload = function(){
+	tx_notes.value  = 
+	"// this is a commented line \n// -- more examples in the folder ./scoe_files\n\n"
+	+	"// wind instrument :\n wind  ++3c............-1b+3c..2C3c...-gF.....A+C-A..F...1feF..+c-c..\n "
+	                + "// plucked string instrument:\n str   1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b1c2D2g1b 4FACFF3ACFFAC2FFACFF1ACFFACFFACF1c2D2g1b1c2D2g1b\n"
 }

@@ -132,6 +132,7 @@ function mixSnd(dest,src,pos,vol=1){
 	
 	for(let k=pos;k<n;k++)
 		dest[k]+=vol*src[k-pos]
+	 
 }
 
 /*-----------------------------------------
@@ -147,4 +148,11 @@ function normalise(v,vol=1.0){
 	mx=vol/mx
 	for(let k=0;k<v.length;k++)
 		v[k]*=mx
+}
+
+function addPhasing(snd,spd,vol){
+	let t = 0
+	for(let k=0;k<snd.length;k++,t+=spd){
+		snd[k] += vol*getV(snd,k+Math.sin(k*spd*6.0/rate))
+	}
 }

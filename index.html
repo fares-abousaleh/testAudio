@@ -67,14 +67,14 @@
 	<td style="width:120pt;">
 		<input type="button" value="load" onclick="loadScore();">
 		<input type="button" value="save" onclick="saveScore();">
-		<input type="button" value="run" onclick="runMusic();">
+		<input type="button" value="run" onclick="tx_log.value='';runMusic();">
 		<input type="button" value="stop" onclick="stopSnd();">
 		<input type="button" value="replay" onclick="playSnd(snd);">
 		<input type="button" value="download wav" onclick="saveWave('snd',snd,rate);">
 	</td>
 	<td>
 		<textarea id="tx_notes"></textarea>
-		<textarea id="tx_ins"></textarea>
+		<textarea id="tx_log"></textarea>
 	</td>
 </tr>
 </table>
@@ -85,5 +85,5 @@
 <script src= "./filters.js">      </script>
 <script src= "./music.js">        </script>
 <script src= "./score.js">        </script>
-<script src= "./editor.js">       </script>
+<script src= "./main.js">       </script>
 </html>
