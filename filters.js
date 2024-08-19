@@ -79,3 +79,21 @@ function Filter(){
 	}
 	
 }
+
+class NLFilter{
+	
+	constructor(eps=0.3,g=0.95){
+		this.eps = eps
+		this.fl = new Filter()
+		this.fl.designDCKill(g)
+		this.prev=0
+	}
+	
+	tic(v){
+		let u = v-this.prev
+		u = this.eps * Math.tanh(u/this.eps)
+		return this.fl.tic(u+this.prev)
+		this.prev=v
+	}
+	
+}

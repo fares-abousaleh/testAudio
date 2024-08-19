@@ -194,6 +194,24 @@ class InsDrm{
 					  'w':[910,1122,4402],
 					  
 				  }
+		 this.frsH = {
+		              'c':[5623 ,900 ,1300],
+					  'd':[5700 ,1122,2402],
+					  'e':[6000,2122,3402],
+					  'f':[6223 ,1832 ,1200],
+					  'g':[6903 ,1262, 1522 ],
+					  'a':[7310,2422,4402],
+				      'C':[7523 , 1500 ,3300],
+					  'D':[8110,5122,9402],
+					  'F':[8390,4122,5402],
+					  'G':[8723 , 832 ,1700 ],
+					  'A':[9110  ,4422, 8522 ],
+					  'b':[9310,1422,2402],
+					  'u':[9410,1422,11202],
+					  'v':[9010,2422,3510 ],
+					  'w':[9010,1122,4402],
+					  
+				  }
 				  
 		this.hist ={}
 	}
@@ -201,14 +219,38 @@ class InsDrm{
 	get(nt,oct,len){
 		if(this.hist[""+nt+oct]==undefined)
 			this.hist[""+nt+oct]=this.make(nt,oct,len)
-		
-		return this.hist[""+nt+oct]
+		const r = this.hist[""+nt+oct]
+		if(oct>4)return r.subarray(0,Math.min(r.length,Math.round(len*rate)))
+		return r
 	}
 	
+	make4(nt,L){
+		const n = rate 
+		const snd = new Float32Array(n)
+		const res = new Filter()
+		res.designRes(this.frsH[nt][0],5)
+		const res1 = new Filter()
+		res1.designRes(this.frsH[nt][1]+this.frsH[nt][0],5)
+		const g =1.0/n
+		let A=1
+		 
+		for(let k=0;k<n;k++){
+			let v = rnd() 
+			res.designRes(this.frsH[nt][1]+this.frsH[nt][0],500/(1+0.0001*k))
+			res1.designRes( this.frsH[nt][0],500/(1+0.01*k))
+			snd[k] =   A*( -res.tic(v)+res1.tic(v)) 
+			 A -= g
+			 
+			 
+		}
+		normalise(snd,0.1)
+		return snd
+	}
 	
 	make(nt,oct,L){
 		let frs = this.frs[nt]
 		if(frs==undefined)return []
+		if(oct>4)return this.make4(nt,L)
 		let snd = new Float32Array(this.N)
 		let th = [0,0,0]
 		const dth0 = Math.PI*2.0/rate
@@ -415,7 +457,7 @@ class InsWind{
 		let   t = 0 
 		const dt = 2*Math.PI/rate
 		const fl = new Filter()
-		const cf  = 300.0/fr
+		const cf  = Math.tanh(600.0/fr)
 		fl.designDCKill(0.95)
 		const va = 1.0/1024
 		const vb = 2.0/1024
@@ -428,8 +470,8 @@ class InsWind{
 			let vb2 = Math.sin(7*t)
 			let A = Math.tanh((2+0.2*vb1-0.1*vb2)*Math.sin(k*Math.PI/n))
 			t+=dt 
-			v = A * Math.sin(th+v*(feed1)*Math.sin(2.005*th))
-			v += A* Math.sin(2*th+A*v*(feed2)*Math.sin(3.005*th))
+			v = A * Math.sin(th+v*(feed1*Math.tanh(600.0/fr))*Math.sin(2.005*th))
+			v += A* Math.sin(2*th+A*v* (feed2*Math.tanh(600.0/fr)) *Math.sin(3.005*th))
 			th += dth   *(1+A*(va*vb1-vb*vb2)*100.0/perd)
 			feed1 /=1+feed1*0.000001 
 			feed2 /=1+feed2*0.00001
@@ -445,7 +487,7 @@ class InsWind{
 
 class InsVio{
 	
-	constructor(frms){
+	constructor(frms=[531,1103,2103]){
 		this.frms = frms
 	}
 	
@@ -460,22 +502,40 @@ class InsVio{
 		let   t = 0 
 		
 		const loo = new Filter() 
-		loo.designLowPass(0.4)
-		
+		loo.designLowPass(0.39 )
+		const lop = new Filter() 
+		lop.designLowPass(0.9999  )
+		const dck = new Filter()
+		dck.designDCKill(0.95)
 		
 		
 		let v = 0
+		const P2 = Math.PI*2
+		let vvv = 1
+		//const fil = new NLFilter(1.235,0.99)
 		
 		for(let k=0;k<n;k++){
+			let vb = (1+0.03521*lop.tic(vvv))
+			if(rndDecide(0.06))vvv=rnd()
 			let vib1 = Math.sin(5*t)
 			let vib2 = Math.sin(7*t)
-			let A = Math.tanh(( 3+0.8*vib1+0.7*vib2)*Math.sin(k*Math.PI/n))
-			let vv = loo.tic( getV(snd,k-perd*1.25  ) )
-			v = A * Math.sin(th+A*vv) 
-			v = Math.tanh( v) 
-			th += dth * ( 1 +0.0215* v    )
-			snd[k] =      v     
 			t+=dt
+			let A = Math.tanh(( 1+0.18*vib1+0.27*vib2)*Math.sin(k*Math.PI/n))
+			 
+			v =  Math.sin(vb*this.frms[0]*th/fr)	
+			v -= A*(v+Math.sin( vb* this.frms[1]*th/fr +Math.sin(301*th/fr)))
+			v += A*(v+Math.sin(vb*this.frms[2]*th/fr))
+			
+			v*=(1-th/P2)
+			 //v = fil.tic(v)
+			
+			v*=1+A*0.3*getV(snd,k-0.3*perd)
+			v*=1+A*0.3*getV(snd,k-0.96*perd)
+			th+=dth*(1+0.0021*vib1-0.0061*vib2)
+			
+			if(th>=P2)th-=P2
+			snd[k] =  A*loo.tic(  dck.tic(  v   ) )
+			
 		}
 		
 		

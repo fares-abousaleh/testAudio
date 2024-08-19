@@ -1,0 +1,10 @@
+perc 3+A A-c+A A-e.1F3+A A-c+A A-e.1F3+A A-c+A A-e.1F3+A A-c+A A-e.1F
+
+next
+perc 1+   C..d-D+d..     C..d-D+d..   C..d-D+d..   C..d-D+d..   C..d-D+d.. 
+perc     1..c.  F..F     ..c.  F..F       ..c.  F..F       ..c.  F..F       ..c.  F..F    
+perc     1 .c.b  e.b.  .c.b  e.A. .c.b  e.A. .c.b  e.A. .c.b  e.A. .c.b  e.b.  
+
+
+next
+perc 3  +  C.-F+C.C-F+A    C.-F+C.C-F+A     C.-F+C.C-F+A     C.-F+C.C-F+A     C.-F+C.C-F+A     

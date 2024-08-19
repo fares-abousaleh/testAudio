@@ -8,6 +8,9 @@ const Ins = {
      'str' : new InsStr(765,  2321,0.221,0.9947,2.1 ),
 	 'bass': new InsStr(454,  905,0.5 ,0.994 ,1.5),
 	 'perc': new InsDrm(),
+	 'vio' : new InsVio(),
+	 'cello':new InsVio([521,991,  1413 ]),
+	 'bow':  new InsVio([ 1921,3433,5001])
 }
 
 
@@ -53,10 +56,10 @@ function runMusic(){
 		}
 		makeMusic(snd,tail,tunit,ins)
 	}
-	addEcho(snd, rate/31  , +0.142  )
-		addEcho(snd, rate/21  , -0.181  )
-		addEcho(snd, rate/121 , -0.2199  )
-		addEcho(snd, rate/34   , +0.112   )
+	addEcho(snd, 1.0/15   , +0.24842  )
+		addEcho(snd, 1.0/12  , -0.19681  )
+		addEcho(snd, 1.0/11 , -0.27199  )
+		addEcho(snd, 1.0/9   , +0.16912   )
 	normalise(snd,0.95)
 	playSnd(snd)
 }
